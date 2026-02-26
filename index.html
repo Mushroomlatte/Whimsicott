@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 Whimsicott TCG Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0e14; --bg2:#10131c; --surface:#161b28; --surface2:#1c2235;
+  --border:#252d44; --border2:#2e3a56;
+  --peach:#FFDAB9; --peach2:#c9a07a; --peach3:#7a4f2e;
+  --teal:#00c4b4; --teal2:#008f84; --teal3:#004d47;
+  --text:#e2e8f8; --text2:#7a89a8; --text3:#4a5570;
+  --green:#52d68a; --red:#f07070;
+  --r:12px; --r2:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── FLOATING FLUFF ── */
+.fluff-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fluff{position:absolute;border-radius:50%;opacity:0;animation:floatUp linear infinite}
+@keyframes floatUp{
+  0%{transform:translateY(100vh) rotate(0deg) scale(0.5);opacity:0}
+  10%{opacity:0.35}
+  90%{opacity:0.2}
+  100%{transform:translateY(-120px) rotate(720deg) scale(1.2);opacity:0}
+}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:200;background:rgba(12,14,20,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.hdr-inner{max-width:1440px;margin:0 auto;padding:0 1.25rem;display:flex;align-items:center;gap:.75rem;height:56px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--peach);letter-spacing:-.02em;white-space:nowrap;flex-shrink:0;cursor:default;user-select:none}
+.logo em{color:var(--teal);font-style:normal}
+.logo .leaf{display:inline-block;animation:leafBob 3s ease-in-out infinite}
+@keyframes leafBob{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.nav{display:flex;gap:2px;margin-left:auto}
+.nav-btn{font-family:'DM Sans',sans-serif;font-weight:600;font-size:.82rem;background:none;border:none;color:var(--text2);cursor:pointer;padding:.45rem .9rem;border-radius:var(--r2);transition:color .2s,background .2s;white-space:nowrap}
+.nav-btn:hover{color:var(--text);background:var(--surface2)}
+.nav-btn.on{color:var(--teal);background:rgba(0,196,180,.08)}
+.gear-btn{background:none;border:1px solid var(--border);color:var(--text2);width:36px;height:36px;border-radius:var(--r2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative}
+.gear-btn:hover{border-color:var(--teal2);color:var(--teal)}
+
+/* ── GEAR PANEL ── */
+.gear-panel{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:.75rem;width:270px;display:none;box-shadow:0 16px 48px rgba(0,0,0,.7);z-index:400}
+.gear-panel.open{display:block;animation:dropIn .2s ease}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.gear-lbl{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.4rem;padding:.25rem .25rem 0;display:block}
+.gear-act{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;border-radius:var(--r2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;margin-bottom:.3rem;transition:all .15s;display:block}
+.gear-act:hover{border-color:var(--teal2);color:var(--teal)}
+.gear-act.danger:hover{border-color:var(--red);color:var(--red)}
+.gear-divider{border:none;border-top:1px solid var(--border);margin:.5rem 0}
+.gear-textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);padding:.45rem .6rem;font-family:'DM Mono',monospace;font-size:.7rem;height:80px;resize:vertical;outline:none;margin-bottom:.3rem;display:none}
+.gear-textarea:focus{border-color:var(--teal2)}
+.gear-note{font-size:.7rem;color:var(--text3);padding:.2rem .25rem;line-height:1.5}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.on{display:block;animation:pgIn .3s ease}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.wrap{max-width:1440px;margin:0 auto;padding:1.5rem 1.25rem;position:relative;z-index:1}
+
+/* ── DASHBOARD ── */
+.dash-hero{background:linear-gradient(135deg,var(--surface) 0%,#12192e 100%);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.dash-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(0,196,180,.06) 0%,transparent 70%);pointer-events:none}
+.cotton-deco{position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:4.5rem;opacity:.1;pointer-events:none;animation:cottonSpin 20s linear infinite}
+@keyframes cottonSpin{0%{transform:translateY(-50%) rotate(0deg)}100%{transform:translateY(-50%) rotate(360deg)}}
+.dash-hero-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--peach);margin-bottom:.25rem;letter-spacing:-.02em;position:relative}
+.dash-hero-sub{font-size:.82rem;color:var(--text2);margin-bottom:1.25rem;position:relative}
+.master-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.5rem}
+.master-lbl{font-size:.78rem;font-weight:600;color:var(--text2)}
+.master-pct{font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:500;color:var(--teal)}
+.bar-track{background:var(--bg2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.bar-track.lg{height:12px}
+.bar-track.sm{height:6px}
+.bar-fill{height:100%;border-radius:999px;transition:width 1.1s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.bar-fill.primary{background:linear-gradient(90deg,var(--teal2),var(--teal))}
+.bar-fill.muted{background:linear-gradient(90deg,var(--teal3),var(--teal2))}
+.bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);animation:shim 2.5s infinite}
+@keyframes shim{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.25rem}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;text-align:center;transition:transform .2s,box-shadow .2s;cursor:default}
+.stat-box:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.stat-num{font-family:'DM Mono',monospace;font-size:1.8rem;font-weight:500;line-height:1;margin-bottom:.3rem}
+.stat-num.t{color:var(--peach)}
+.stat-num.o{color:var(--green)}
+.stat-num.m{color:var(--red)}
+.stat-lbl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text2)}
+
+.sec-head{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.sec-head::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.lang-list{display:flex;flex-direction:column;gap:.6rem}
+.lang-row{display:grid;grid-template-columns:140px 1fr 72px;align-items:center;gap:.75rem;transition:transform .15s}
+.lang-row:hover{transform:translateX(3px)}
+.lang-name{font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang-ct{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text2);text-align:right}
+.lang-complete{position:relative}
+.lang-complete .bar-fill::before{content:'✓';position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:.45rem;color:rgba(255,255,255,.8);font-weight:700}
+
+/* ── STATS PAGE ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stats-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.stats-card-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.milestone{display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:var(--r2);margin-bottom:.4rem;transition:background .2s}
+.milestone.unlocked{background:rgba(82,214,138,.06);border:1px solid rgba(82,214,138,.2)}
+.milestone.locked{background:var(--surface2);border:1px solid var(--border);opacity:.5}
+.milestone-icon{font-size:1.4rem;flex-shrink:0}
+.milestone-text{flex:1}
+.milestone-name{font-size:.82rem;font-weight:600;color:var(--text)}
+.milestone-desc{font-size:.7rem;color:var(--text2);margin-top:.1rem}
+.milestone-badge{font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:4px;background:var(--green);color:var(--bg);white-space:nowrap}
+.milestone.locked .milestone-badge{background:var(--border2);color:var(--text3)}
+
+.donut-wrap{position:relative;width:120px;height:120px;flex-shrink:0}
+.donut-wrap svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Mono',monospace}
+.donut-pct{font-size:1.3rem;font-weight:500;color:var(--teal)}
+.donut-lbl{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.donut-row{display:flex;align-items:center;gap:1rem}
+.donut-info{flex:1}
+.donut-stat{font-size:.82rem;color:var(--text2);margin-bottom:.3rem}
+.donut-stat strong{color:var(--text);font-family:'DM Mono',monospace}
+
+.top-langs{display:flex;flex-direction:column;gap:.5rem}
+.top-lang-row{display:flex;align-items:center;gap:.75rem}
+.top-lang-medal{font-size:1.1rem;width:1.5rem;text-align:center}
+.top-lang-name{font-size:.82rem;font-weight:500;flex:1}
+.top-lang-pct{font-family:'DM Mono',monospace;font-size:.76rem;color:var(--teal)}
+
+/* ── TOOLBAR ── */
+.cards-toolbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.hunt-toggle{display:flex;align-items:center;gap:.6rem;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:.3rem .3rem .3rem .75rem;cursor:pointer;user-select:none;font-size:.78rem;font-weight:600;color:var(--text2);transition:all .2s;flex-shrink:0}
+.hunt-toggle:hover{border-color:var(--red);color:var(--text)}
+.hunt-toggle.on{border-color:var(--red);background:rgba(240,112,112,.08);color:var(--red)}
+.toggle-pill{width:32px;height:18px;border-radius:999px;background:var(--border2);position:relative;transition:background .2s;flex-shrink:0}
+.hunt-toggle.on .toggle-pill{background:var(--red)}
+.toggle-pill::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.hunt-toggle.on .toggle-pill::after{transform:translateX(14px)}
+.srch{flex:1;min-width:180px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);padding:.42rem .8rem;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+.srch:focus{border-color:var(--teal2)}
+.srch::placeholder{color:var(--text3)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.chip-lbl{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.chip{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:.28rem .65rem;border-radius:999px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--teal2);color:var(--text)}
+.chip.on{background:var(--teal3);border-color:var(--teal2);color:var(--teal)}
+.chip.on-red{background:rgba(240,112,112,.15);border-color:var(--red);color:var(--red)}
+.view-tgl{display:flex;gap:2px;margin-left:auto}
+.vtgl-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text3);width:32px;height:32px;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .15s}
+.vtgl-btn.on,.vtgl-btn:hover{border-color:var(--teal2);color:var(--teal)}
+
+/* ── HUNT BANNER ── */
+.hunt-banner{background:linear-gradient(135deg,rgba(240,112,112,.08),rgba(240,112,112,.04));border:1px solid rgba(240,112,112,.3);border-radius:var(--r);padding:.875rem 1.1rem;margin-bottom:1rem;align-items:center;gap:1rem;display:none}
+.hunt-banner.show{display:flex;animation:pgIn .25s ease}
+.hunt-banner-title{font-family:'Syne',sans-serif;font-weight:800;color:var(--red);font-size:.95rem}
+.hunt-banner-sub{font-size:.76rem;color:var(--text2);margin-top:.1rem}
+.hunt-count-badge{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--red);margin-left:auto}
+
+/* ── CARD GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem}
+.grid.list{grid-template-columns:1fr;gap:.4rem}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.card.owned{border-color:rgba(82,214,138,.25)}
+.card.missing{border-color:rgba(240,112,112,.15)}
+.card.hunt-card{cursor:pointer}
+.card.hunt-card:hover{border-color:rgba(240,112,112,.5);transform:translateY(-4px)}
+.card.hunt-card:active{transform:scale(.97)}
+.card.can-unmark{cursor:pointer}
+.card.can-unmark:hover{border-color:rgba(240,112,112,.5)}
+.card.caught{animation:catchPop .5s cubic-bezier(.36,.07,.19,.97);border-color:var(--green)!important}
+@keyframes catchPop{0%{transform:scale(1)}25%{transform:scale(1.07)}60%{transform:scale(.98)}100%{transform:scale(1)}}
+
+/* ── CARD FLIP ── */
+.card-flip-wrap{perspective:800px}
+.card-flip-inner{position:relative;width:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.card-flip-inner.flipped{transform:rotateY(180deg)}
+.card-face,.card-back{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card-back{position:absolute;inset:0;background:var(--surface2);backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.75rem;gap:.4rem;border-radius:var(--r) var(--r) 0 0}
+.card-back-title{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;color:var(--peach);text-align:center;line-height:1.3}
+.card-back-row{font-size:.65rem;color:var(--text2);text-align:center;font-family:'DM Mono',monospace}
+.card-back-status{font-size:.7rem;font-weight:700;padding:.2rem .5rem;border-radius:6px}
+.card-back-status.owned{background:rgba(82,214,138,.2);color:var(--green)}
+.card-back-status.missing{background:rgba(240,112,112,.15);color:var(--red)}
+.flip-hint{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.5);color:rgba(255,255,255,.5);font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em;pointer-events:none;opacity:0;transition:opacity .2s}
+.card:hover .flip-hint{opacity:1}
+
+.card-img{background:var(--surface2);aspect-ratio:2.5/3.5;overflow:hidden;position:relative}
+.card-img img{width:100%;height:100%;object-fit:contain;padding:5px;transition:transform .25s}
+.card:hover .card-img img{transform:scale(1.04)}
+.card-img .no-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--border2)}
+.sdot{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;border:1px solid rgba(0,0,0,.3);z-index:2}
+.sdot.o{background:var(--green);color:#0c0e14}
+.sdot.m{background:var(--red);color:#0c0e14}
+.tap-hint{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(240,112,112,.85));color:white;font-size:.6rem;font-weight:700;text-align:center;padding:.6rem .25rem .3rem;text-transform:uppercase;letter-spacing:.1em;opacity:0;transition:opacity .2s;pointer-events:none;z-index:2}
+.card.hunt-card:hover .tap-hint{opacity:1}
+.unmark-hint{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(240,112,112,.85));color:white;font-size:.6rem;font-weight:700;text-align:center;padding:.6rem .25rem .3rem;text-transform:uppercase;letter-spacing:.1em;opacity:0;transition:opacity .2s;pointer-events:none;z-index:2}
+.card.can-unmark:hover .unmark-hint{opacity:1}
+.catch-overlay{position:absolute;inset:0;background:rgba(82,214,138,.82);display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0;border-radius:var(--r2);transition:opacity .25s;pointer-events:none}
+.card.caught .catch-overlay{opacity:1}
+.card-body{padding:.5rem .6rem .6rem}
+.card-name{font-size:.76rem;font-weight:600;color:var(--text);line-height:1.25;margin-bottom:.2rem}
+.card-sub{font-family:'DM Mono',monospace;font-size:.64rem;color:var(--text2)}
+.card-tag{display:inline-block;margin-top:.3rem;font-size:.62rem;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:.1rem .35rem;border-radius:4px}
+.new-badge{font-size:.58rem;color:var(--peach2);background:var(--peach3);padding:.05rem .3rem;border-radius:3px;font-weight:700;margin-left:.25rem}
+
+/* ── CARD ACTIONS (delete / unmark) ── */
+.card-actions{display:flex;gap:.35rem;padding:.4rem .6rem .5rem;border-top:1px solid var(--border)}
+.card-act-btn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:.3rem .4rem;border-radius:var(--r2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:all .15s;white-space:nowrap;text-align:center}
+.card-act-btn:hover{border-color:var(--teal2);color:var(--teal)}
+.card-act-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.card-act-btn.unmark-btn:hover{border-color:var(--peach2);color:var(--peach)}
+
+/* ── CONFIRM DELETE OVERLAY ── */
+.delete-overlay{position:absolute;inset:0;background:rgba(12,14,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;z-index:10;border-radius:var(--r);opacity:0;pointer-events:none;transition:opacity .2s}
+.delete-overlay.show{opacity:1;pointer-events:all}
+.delete-overlay p{font-size:.76rem;color:var(--text2);text-align:center;padding:0 .75rem;line-height:1.4}
+.delete-confirm-btns{display:flex;gap:.5rem}
+.del-yes{background:rgba(240,112,112,.15);border:1px solid var(--red);color:var(--red);padding:.35rem .8rem;border-radius:var(--r2);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;transition:all .15s}
+.del-yes:hover{background:var(--red);color:var(--bg)}
+.del-no{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:.35rem .8rem;border-radius:var(--r2);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;transition:all .15s}
+.del-no:hover{border-color:var(--teal2);color:var(--teal)}
+
+/* list mode */
+.grid.list .card{display:flex;align-items:center;gap:.65rem;padding:.5rem .6rem}
+.grid.list .card-img{width:46px;min-width:46px;height:64px;aspect-ratio:unset;border-radius:var(--r2);flex-shrink:0}
+.grid.list .card-body{flex:1;padding:0}
+.grid.list .card-name{font-size:.84rem}
+.grid.list .sdot{position:static;margin-left:auto;flex-shrink:0}
+.grid.list .tap-hint,.grid.list .unmark-hint,.grid.list .flip-hint{display:none}
+.grid.list .catch-overlay{border-radius:var(--r2)}
+.grid.list .card-flip-wrap{flex:none;width:46px;min-width:46px}
+.grid.list .card-flip-inner{transform:none!important}
+.grid.list .card-back{display:none}
+
+/* ── ADD CARD MODAL ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:1.5rem;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.8);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--peach);margin-bottom:.25rem}
+.modal-sub{font-size:.78rem;color:var(--text2);margin-bottom:1.25rem}
+.form-row{margin-bottom:.875rem}
+.form-lbl{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);display:block;margin-bottom:.35rem}
+.form-input,.form-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);padding:.5rem .75rem;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus{border-color:var(--teal2)}
+.form-select option{background:var(--surface2)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-owned-toggle{display:flex;align-items:center;gap:.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:.6rem .75rem;cursor:pointer;user-select:none;transition:border-color .2s}
+.form-owned-toggle.yes{border-color:var(--green);background:rgba(82,214,138,.06)}
+.form-owned-pill{width:36px;height:20px;border-radius:999px;background:var(--border2);position:relative;transition:background .2s;flex-shrink:0}
+.form-owned-toggle.yes .form-owned-pill{background:var(--green)}
+.form-owned-pill::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.form-owned-toggle.yes .form-owned-pill::after{transform:translateX(16px)}
+.form-owned-lbl{font-size:.82rem;font-weight:600;color:var(--text2);transition:color .2s}
+.form-owned-toggle.yes .form-owned-lbl{color:var(--green)}
+.modal-actions{display:flex;gap:.5rem;margin-top:1.25rem}
+.btn-primary{flex:1;background:var(--teal3);border:1px solid var(--teal2);color:var(--teal);padding:.6rem;border-radius:var(--r2);font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--teal2);color:var(--bg)}
+.btn-cancel{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:.6rem 1rem;border-radius:var(--r2);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--red);color:var(--red)}
+
+/* ── UNDO BAR ── */
+.undo-bar{background:var(--surface2);border:1px solid var(--peach3);border-radius:var(--r2);padding:.55rem .9rem;display:none;align-items:center;justify-content:space-between;margin-bottom:.875rem;font-size:.8rem;font-weight:500;color:var(--peach2);gap:.75rem}
+.undo-bar.show{display:flex;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.undo-act{background:var(--peach3);border:none;color:var(--peach);padding:.25rem .7rem;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.76rem;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.undo-act:hover{background:var(--peach2);color:var(--bg)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--surface);border:1px solid var(--teal2);color:var(--teal);padding:.65rem 1.1rem;border-radius:var(--r);font-weight:600;font-size:.85rem;z-index:9999;pointer-events:none;max-width:280px;transform:translateY(20px);opacity:0;transition:all .25s;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.toast.up{transform:translateY(0);opacity:1}
+.toast.undo{border-color:var(--peach2);color:var(--peach)}
+.toast.warn{border-color:var(--red);color:var(--red)}
+
+/* ── CONFETTI CANVAS ── */
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:9998}
+
+/* ── LANG COMPLETE POPUP ── */
+.lang-complete-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,var(--surface),#12192e);border:2px solid var(--teal);border-radius:var(--r);padding:2rem;text-align:center;z-index:9997;pointer-events:none;box-shadow:0 24px 64px rgba(0,0,0,.8)}
+.lang-complete-popup.show{animation:popupIn .5s cubic-bezier(.34,1.56,.64,1) forwards,popupOut .4s ease 3s forwards}
+@keyframes popupIn{to{transform:translate(-50%,-50%) scale(1)}}
+@keyframes popupOut{to{transform:translate(-50%,-50%) scale(0);opacity:0}}
+.lang-complete-popup .popup-icon{font-size:3rem;margin-bottom:.5rem;display:block}
+.lang-complete-popup .popup-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--teal);margin-bottom:.25rem}
+.lang-complete-popup .popup-sub{font-size:.85rem;color:var(--text2)}
+
+/* ── RESULT META ── */
+.result-meta{font-size:.75rem;color:var(--text3);font-weight:500;margin-bottom:.875rem;display:flex;justify-content:space-between;align-items:center}
+.add-card-btn{background:var(--teal3);border:1px solid var(--teal2);color:var(--teal);padding:.3rem .75rem;border-radius:var(--r2);font-family:'DM Sans',sans-serif;font-weight:700;font-size:.76rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.35rem}
+.add-card-btn:hover{background:var(--teal2);color:var(--bg)}
+.empty{text-align:center;padding:3rem 1rem;color:var(--text3)}
+.empty .e-icon{font-size:2.5rem;margin-bottom:.75rem}
+.empty p{font-size:.85rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .hdr-inner{height:auto;padding:.5rem 1rem;flex-wrap:wrap;gap:.5rem}
+  .logo{font-size:1rem}
+  .nav-btn{font-size:.76rem;padding:.35rem .6rem}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .stat-num{font-size:1.3rem}
+  .lang-row{grid-template-columns:90px 1fr 55px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.55rem}
+  .wrap{padding:1rem .875rem}
+  .form-row-2{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){.grid{grid-template-columns:repeat(2,1fr)}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── EDIT CARD MODAL ── */
+.edit-act-btn{flex:1;background:rgba(0,196,180,.08);border:1px solid var(--teal2);color:var(--teal);padding:.3rem .4rem;border-radius:var(--r2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:all .15s;text-align:center}
+.edit-act-btn:hover{background:var(--teal2);color:var(--bg)}
+.grid.list .edit-act-btn{padding:.25rem .6rem;font-size:.72rem}
+
+/* ── UPLOAD ── */
+.upload-btn:hover{border-color:var(--peach2)!important;color:var(--peach)!important}
+.upload-progress{position:absolute;inset:0;background:rgba(12,14,20,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;z-index:11;border-radius:var(--r);pointer-events:none;opacity:0;transition:opacity .2s}
+.upload-progress.show{opacity:1;pointer-events:all}
+.upload-progress .up-icon{font-size:2rem;animation:upBounce .6s ease-in-out infinite alternate}
+@keyframes upBounce{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.upload-progress .up-txt{font-size:.75rem;color:var(--teal);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- FLOATING COTTON FLUFF -->
+<div class="fluff-layer" id="fluff-layer"></div>
+<canvas id="confetti-canvas"></canvas>
+<div class="lang-complete-popup" id="lang-popup">
+  <span class="popup-icon">🎊</span>
+  <div class="popup-title" id="popup-title">Language Complete!</div>
+  <div class="popup-sub" id="popup-sub">You collected them all!</div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo"><span class="leaf">🌿</span> Whimsicott <em>TCG</em></div>
+    <nav class="nav">
+      <button class="nav-btn on" onclick="go('dash')">Dashboard</button>
+      <button class="nav-btn" onclick="go('cards')">Collection</button>
+      <button class="nav-btn" onclick="go('stats')">Stats</button>
+    </nav>
+    <div style="position:relative;margin-left:.5rem">
+      <button class="gear-btn" onclick="toggleGear()" title="Settings">⚙</button>
+      <div class="gear-panel" id="gear-panel">
+        <span class="gear-lbl">Backup &amp; Restore</span>
+        <button class="gear-act" onclick="exportData()">⬇ Export full backup</button>
+        <button class="gear-act" onclick="importFromFile()">📂 Restore from file (recommended)</button>
+        <button class="gear-act" style="opacity:.7;font-size:.72rem" onclick="showImport()">📋 Restore by pasting JSON instead</button>
+        <textarea class="gear-textarea" id="import-ta" placeholder="Paste your whimsicott-backup.json contents here…" style="display:none"></textarea>
+        <button class="gear-act" id="import-paste-btn" onclick="importData()" style="display:none">✅ Restore from pasted JSON</button>
+        <hr class="gear-divider">
+        <span class="gear-lbl">Danger Zone</span>
+        <button class="gear-act danger" onclick="resetData()">⚠ Reset to spreadsheet defaults</button>
+        <button class="gear-act" onclick="restoreHidden()">👁 Restore hidden cards</button>
+        <hr class="gear-divider">
+        <div class="gear-note" style="margin-top:.4rem">
+  <strong style="color:var(--text2)">💡 Tips:</strong><br>
+  • <strong>URL images:</strong> paste link into ✏ Edit → Image URL<br>
+  • <strong>Downloaded images:</strong> put in <code style="color:var(--teal);font-size:.65rem">Images/</code> folder → redeploy → use <code style="color:var(--teal);font-size:.65rem">Images/name.png</code> as path<br>
+  • <strong>Backup includes:</strong> ownership, edits, custom cards &amp; uploaded photos
+</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<!-- ADD CARD MODAL -->
+<div class="modal-backdrop" id="add-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">➕ Add New Card</div>
+    <div class="modal-sub">Add a newly released Whimsicott card to your tracker</div>
+    <div class="form-row">
+      <label class="form-lbl">Set Name *</label>
+      <input type="text" class="form-input" id="f-setname" placeholder="e.g. Scarlet & Violet 151">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Card Number</label>
+        <input type="text" class="form-input" id="f-setnum" placeholder="e.g. 073/165">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Version / Variant</label>
+        <input type="text" class="form-input" id="f-version" placeholder="e.g. Reverse Holo">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Language *</label>
+      <select class="form-select" id="f-lang">
+        <option value="English">🇬🇧 English</option>
+        <option value="Japanese">🇯🇵 Japanese</option>
+        <option value="Italian">🇮🇹 Italian</option>
+        <option value="Spanish">🇪🇸 Spanish</option>
+        <option value="German">🇩🇪 German</option>
+        <option value="French">🇫🇷 French</option>
+        <option value="Korean">🇰🇷 Korean</option>
+        <option value="Indonesian">🇮🇩 Indonesian</option>
+        <option value="Thai">🇹🇭 Thai</option>
+        <option value="Traditional Chinese">🇹🇼 Traditional Chinese</option>
+        <option value="Simplified Chinese">🇨🇳 Simplified Chinese</option>
+        <option value="Portuguese">🇧🇷 Portuguese</option>
+        <option value="Russian">🇷🇺 Russian</option>
+        <option value="Other">🌐 Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Image URL <span style="color:var(--text3)">(optional)</span></label>
+      <input type="text" class="form-input" id="f-imgurl" placeholder="https://…">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Notes <span style="color:var(--text3)">(optional)</span></label>
+      <input type="text" class="form-input" id="f-notes" placeholder="e.g. Event stamp, bundle promo…">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Do you own this card?</label>
+      <div class="form-owned-toggle" id="f-owned-toggle" onclick="toggleFormOwned()">
+        <div class="form-owned-pill"></div>
+        <span class="form-owned-lbl" id="f-owned-lbl">Not owned yet</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitNewCard()">✅ Add Card</button>
+      <button class="btn-cancel" onclick="closeModalDirect()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page on" id="pg-dash">
+  <div class="wrap">
+    <div class="dash-hero">
+      <div class="cotton-deco">🌿</div>
+      <div class="dash-hero-title">Your Whimsicott Collection</div>
+      <div class="dash-hero-sub">Tracking every card across every language 🌍</div>
+      <div class="master-row">
+        <span class="master-lbl">Master Completion</span>
+        <span class="master-pct" id="d-pct">—</span>
+      </div>
+      <div class="bar-track lg"><div class="bar-fill primary" id="d-fill" style="width:0%"></div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num t" id="d-total">—</div><div class="stat-lbl">Tracked</div></div>
+      <div class="stat-box"><div class="stat-num o" id="d-owned">—</div><div class="stat-lbl">Owned</div></div>
+      <div class="stat-box"><div class="stat-num m" id="d-miss">—</div><div class="stat-lbl">Missing</div></div>
+    </div>
+    <div class="sec-head">By Language</div>
+    <div class="lang-list" id="d-langs"></div>
+  </div>
+</div>
+
+<!-- COLLECTION -->
+<div class="page" id="pg-cards">
+  <div class="wrap">
+    <div class="cards-toolbar">
+      <div class="hunt-toggle" id="hunt-toggle" onclick="toggleHunt()">
+        🎯 Hunt Mode<div class="toggle-pill"></div>
+      </div>
+      <input type="text" class="srch" id="c-search" placeholder="Search set, number, language…" oninput="renderCards()">
+      <div class="chips" id="c-status-chips">
+        <span class="chip-lbl">Show</span>
+        <button class="chip" data-s="owned" onclick="toggleStatus(this)">✅ Owned</button>
+        <button class="chip" data-s="missing" onclick="toggleStatus(this)">❌ Missing</button>
+      </div>
+      <div class="chips" id="c-lang-chips"></div>
+      <div class="view-tgl">
+        <button class="vtgl-btn on" id="vg" onclick="setView('grid')" title="Grid">⊞</button>
+        <button class="vtgl-btn" id="vl" onclick="setView('list')" title="List">☰</button>
+      </div>
+    </div>
+    <div class="hunt-banner" id="hunt-banner">
+      <div style="font-size:1.5rem">🎯</div>
+      <div>
+        <div class="hunt-banner-title">Hunting Mode Active</div>
+        <div class="hunt-banner-sub">Tap missing cards to mark owned · Tap owned cards to unmark · Click any card to flip for details</div>
+      </div>
+      <div class="hunt-count-badge" id="hunt-count">—</div>
+    </div>
+    <div class="undo-bar" id="undo-bar">
+      <span id="undo-msg"></span>
+      <button class="undo-act" onclick="doUndo()">↩ Undo</button>
+    </div>
+    <div class="result-meta" id="c-meta">
+      <span id="c-meta-txt"></span>
+      <button class="add-card-btn" onclick="openModal()">➕ Add New Card</button>
+    </div>
+    <div class="grid" id="c-grid"></div>
+  </div>
+</div>
+
+<!-- STATS PAGE -->
+<div class="page" id="pg-stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stats-card-title">🍩 Collection Overview</div>
+        <div class="donut-row">
+          <div class="donut-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#252d44" stroke-width="14"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="url(#dg)" stroke-width="14"
+                stroke-dasharray="301.6" stroke-dashoffset="301.6" id="donut-arc" stroke-linecap="round"/>
+              <defs><linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#008f84"/><stop offset="100%" stop-color="#00c4b4"/>
+              </linearGradient></defs>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-pct" id="donut-pct">0%</div>
+              <div class="donut-lbl">done</div>
+            </div>
+          </div>
+          <div class="donut-info">
+            <div class="donut-stat"><strong id="s-owned">—</strong> cards owned</div>
+            <div class="donut-stat"><strong id="s-miss">—</strong> still missing</div>
+            <div class="donut-stat"><strong id="s-total">—</strong> total tracked</div>
+            <div class="donut-stat"><strong id="s-langs">—</strong> languages</div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">🏆 Top Languages</div>
+        <div class="top-langs" id="top-langs"></div>
+      </div>
+      <div class="stats-card" style="grid-column:1/-1">
+        <div class="stats-card-title">🎖 Milestones</div>
+        <div id="milestones-wrap" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.5rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+// DATA
+// ════════════════════════════════════
+const BASE = [{"id":"English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 065","version":"Stamped","owned":true,"language":"English","notes":"","imageUrl":"https://tcgplayer-cdn.tcgplayer.com/product/498546_in_1000x1000.jpg"},{"id":"English_Fates_Collide_71_124_Reverse_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Reverse Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://i.ebayimg.com/images/g/EzYAAOSwHVhnWIWb/s-l225.jpg","localImage":"Images/EN/FCO_071_R_EN_SM.png"},{"id":"English_Unified_Minds_144_236_Reverse_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://i.ebayimg.com/images/g/MG4AAOSwhsZgT2zc/s-l400.jpg","localImage":"Images/EN/UNM_144_R_EN_SM.png"},{"id":"English_Emerging_Powers_12_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://storage.googleapis.com/images.pricecharting.com/9e5c7b0727a9b37c279d34d9d0ecf75e4bfb30fa669945006a003b8c4f826b59/240.jpg","localImage":"Images/EN/EPO_012_R_EN_SM.png"},{"id":"English_Prismatic_Evolutions_008_131_Masterball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Masterball","owned":true,"language":"English","notes":"Rare","imageUrl":"https://storage.googleapis.com/images.pricecharting.com/eqbmxmqm6qhkrwdt/1600.jpg"},{"id":"English_Sword___Shield_006_202_Reverse_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://doujkbm8mih0s.cloudfront.net/static/images/alt/large/swsh1/6-Whimsicott-Reverse-Holo.jpg","localImage":"Images/EN/SSH_006_R_EN_SM.png"},{"id":"English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 064","version":"Stamped","owned":true,"language":"English","notes":"","imageUrl":"https://cdn11.bigcommerce.com/s-b4ioc4fed9/images/stencil/1280x1280/products/470981/2869108/cSYATpbNPKehUPRao4TwSB4tU__23708.1763932571.jpg?c=1","localImage":""},{"id":"English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped","setName":"Play! Pokemon Prize Pack Series 1","setNumber":"PPS1 VIV 076","version":"Stamped","owned":true,"language":"English","notes":"","imageUrl":"https://cdn6966.templcdn.com/wp-content/uploads/2024/11/EN_S1070Play-PokemonSpecial-Print-215x300.jpg","localImage":""},{"id":"English_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://unicorncards.co.uk/images/thumbs/0220991_whimsicott-91145-uncommon-mintnear-mint-pokemon-card-sm02-guardians-rising_960.jpeg","localImage":"Images/EN/GRI_091_R_EN_SM.png"},{"id":"English_Guardians_Rising_91_145_Reverse_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Reverse Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://www.hillscards.co.uk/images/pokemon-trading-card-game-91-145-whimsicott-reverse-holo-sm-02-guardians-rising-p39273-25777_thumb.jpg","localImage":"Images/EN/GRI_091_R_EN_SM.png"},{"id":"English_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://www.hillscards.co.uk/images/pokemon-trading-card-game-71-124-whimsicott-uncommon-xy-10-fates-collide-p39854-26424_zoom.jpg","localImage":"Images/EN/FCO_071_R_EN_SM.png"},{"id":"English_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://i.ebayimg.com/images/g/N2AAAOSwL~poHhN5/s-l1200.jpg","localImage":"Images/EN/AOR_056_R_EN_SM.png"},{"id":"English_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://i.ebayimg.com/images/g/u1kAAOSwgQ9Vz5Q3/s-l400.jpg","localImage":"Images/EN/AOR_056_R_EN_SM.png"},{"id":"English_Unbroken_Bonds_226_214_Rainbow_Rare","setName":"Unbroken Bonds","setNumber":"226/214","version":"Rainbow Rare","owned":true,"language":"English","notes":"GX","imageUrl":"https://i.ebayimg.com/images/g/u1kAAOSwgQ9Vz5Q3/s-l400.jpg","localImage":"Images/EN/UNB_226_R_EN_SM.png"},{"id":"English_Unbroken_Bonds_206_214_Full_Art","setName":"Unbroken Bonds","setNumber":"206/214","version":"Full Art","owned":true,"language":"English","notes":"GX","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBUOV_7hUUeUUU0xZndILlNzolCw3EALxbsw&s","localImage":"Images/EN/UNB_206_R_EN_SM.png"},{"id":"English_Brilliant_Stars_175_172_Rainbow_Rare","setName":"Brilliant Stars","setNumber":"175/172","version":"Rainbow Rare","owned":true,"language":"English","notes":"Vstar","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAz0E_Y5PbE4GJxlmNSlVm5vZlCsGo2drjXw&s","localImage":"Images/EN/BRS_175_R_EN_SM.png"},{"id":"English_Brilliant_Stars_160_172_Full_Art","setName":"Brilliant Stars","setNumber":"160/172","version":"Full Art","owned":true,"language":"English","notes":"V","imageUrl":"","localImage":"Images/EN/BRS_160_R_EN_SM.png"},{"id":"English_Boundaries_Crossed_15_149_Reverse_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://cdn11.bigcommerce.com/s-b4ioc4fed9/images/stencil/1280x1280/products/311439/1898486/1417716365-91752000__85191.1730128615.jpg?c=1","localImage":"Images/EN/BCR_015_R_EN_SM.png"},{"id":"English_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/BCR_015_R_EN_SM.png"},{"id":"English_Cosmic_Eclipse_148_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/CEC_148_R_EN_SM.png"},{"id":"English_Cosmic_Eclipse_148_236_Reverse_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/CEC_148_R_EN_SM.png"},{"id":"English_Unified_Minds_144_236_Non_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/UNM_144_R_EN_SM.png"},{"id":"English_Unbroken_Bonds_140_214_Half_Art","setName":"Unbroken Bonds","setNumber":"140/214","version":"Half Art","owned":true,"language":"English","notes":"GX","imageUrl":"","localImage":"Images/EN/UNB_140_R_EN_SM.png"},{"id":"English_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/EPO_012_R_EN_SM.png"},{"id":"English_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"","localImage":"Images/EN/EPO_011_R_EN_SM.png"},{"id":"English_Emerging_Powers_11_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Reverse Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"","localImage":"Images/EN/EPO_011_R_EN_SM.png"},{"id":"English_Vivid_Voltage_076_185_Reverse_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://cdn11.bigcommerce.com/s-b4ioc4fed9/images/stencil/1280x1280/products/322739/1770202/1607515351-65413300__01671.1723889439.jpg?c=1","localImage":"Images/EN/VIV_076_R_EN_SM.png"},{"id":"English_Vivid_Voltage_076_185_Non_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/VIV_076_R_EN_SM.png"},{"id":"English_Brilliant_Stars_065_172_Half_Art","setName":"Brilliant Stars","setNumber":"065/172","version":"Half Art","owned":true,"language":"English","notes":"Vstar","imageUrl":"","localImage":"Images/EN/BRS_065_R_EN_SM.png"},{"id":"English_Brilliant_Stars_064_172_Half_Art","setName":"Brilliant Stars","setNumber":"064/172","version":"Half Art","owned":true,"language":"English","notes":"V","imageUrl":"","localImage":"Images/EN/BRS_064_R_EN_SM.png"},{"id":"English_Paldean_Fates_035_091_Non_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Non Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://www.hillscards.co.uk/images/pokemon-trading-card-game-035-091-whimsicott-uncommon-card-sv-04-5-paldean-fates-p77881-149190_image.jpg","localImage":"Images/EN/PAF_035_R_EN_SM.png"},{"id":"English_Paldean_Fates_035_091_Reverse_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Reverse Holo","owned":true,"language":"English","notes":"Uncommon","imageUrl":"https://cdn11.bigcommerce.com/s-b4ioc4fed9/images/stencil/1280x1280/products/489728/1778561/PAF1_REV_035__97761.1724044573.jpg?c=1","localImage":"Images/EN/PAF_035_R_EN_SM.png"},{"id":"English_Temporal_Forces_015_162_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://i.ebayimg.com/images/g/ocsAAOSwiUhmG006/s-l1200.jpg","localImage":"Images/EN/TEF_015_R_EN_SM.png"},{"id":"English_Temporal_Forces_015_162_Reverse_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://i.ebayimg.com/images/g/dv0AAOSwPxdl~I9-/s-l1200.jpg","localImage":"Images/EN/TEF_015_R_EN_SM.png"},{"id":"English_Prismatic_Evolutions_008_131_Reverse_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Reverse Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://i.ebayimg.com/images/g/phkAAOSwpzZntxd5/s-l1200.jpg"},{"id":"English_Prismatic_Evolutions_008_131_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"https://img.tradera.net/large-fit/948/599881948_5c48081d-88e1-4e82-ac60-99997c4c69d5.jpg"},{"id":"English_Prismatic_Evolutions_008_131_Pokeball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Pokeball","owned":true,"language":"English","notes":"Rare","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOsp6YfIzy4zAgYS9_Eo1Zfnu8DYMJ5Hsswg&s","localImage":""},{"id":"English_Sword___Shield_006_202_Non_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Non Holo","owned":true,"language":"English","notes":"Rare","imageUrl":"","localImage":"Images/EN/SSH_006_R_EN_SM.png"},{"id":"English_White_Flare_005_086_Half_Art","setName":"White Flare","setNumber":"005/086","version":"Half Art","owned":true,"language":"English","notes":"","imageUrl":"https://s3.pokeos.com/pokeos-uploads/tcg/eng/src/rsv10-5_en_005_t.png","localImage":""},{"id":"English_White_Flare_157_086_Full_Art","setName":"White Flare","setNumber":"157/086","version":"Full Art","owned":true,"language":"English","notes":"","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE_jyjzvsERZz5Jt355Ha3_mg5Q_eBpQ9YNg&s","localImage":""},{"id":"English_White_Flare_165_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"165/086","version":"Special Illustration Rare","owned":true,"language":"English","notes":"","imageUrl":"https://shop.orbsportscards.com/cdn/shop/files/31611869-front.jpg?v=1755800323","localImage":""},{"id":"English_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"English","notes":"promo","imageUrl":"https://assets.pokemon.com/static-assets/content-assets/cms2/img/cards/web/MEP/MEP_EN_19.png","localImage":""},{"id":"Japanese_Black_Collection_BW1_005_53_Non_Holo","setName":"Black Collection","setNumber":"BW1 005/53","version":"Non Holo","owned":false,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/PNYAAeSwoEpocryY/s-l960.webp","localImage":""},{"id":"Japanese_M_Audino-EX_Mega_Battle_Deck_XYH_007_026_Non_Holo","setName":"M Audino-EX Mega Battle Deck","setNumber":"XYH 007/026","version":"Non Holo","owned":false,"language":"Japanese","notes":"In the mega M Audino-EX Mega Battle Deck","imageUrl":"https://i.ebayimg.com/images/g/vhcAAeSwPiNpQq44/s-l1600.webp","localImage":""},{"id":"Japanese_Facing_a_New_Trail_SM2__042_049_Reverse_Holo","setName":"Facing a New Trail","setNumber":"SM2+ 042/049","version":"Reverse Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://static.tcgcollector.com/content/images/42/1d/76/421d7630bc201237ffe84908dee58f291be9b215aa2c5349ab58d5c7c1876a86.jpg"},{"id":"Japanese_Double_Blaze_sm10_112_095_Gx_Rainbow","setName":"Double Blaze","setNumber":"sm10 112/095","version":"Gx Rainbow","owned":false,"language":"Japanese","notes":"","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-GX-HR-Double-Blaze-sm10-112-095-Japanese-Single-Card_6bc713dc-0d36-4875-8909-e9df0e100e13.webp?v=1743467400"},{"id":"Japanese_BW-P_Promotional_Cards_060_BW-P_Stamped","setName":"BW-P Promotional Cards","setNumber":"060/BW-P","version":"Stamped","owned":true,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/P7UAAeSwtCZpnv-R/s-l1600.webp","localImage":""},{"id":"Japanese_Freeze_Bolt_BW6_009_059_Non_Holo","setName":"Freeze Bolt","setNumber":"BW6 009/059","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/bNwAAeSwJjxpYZ9E/s-l1600.webp","localImage":""},{"id":"Japanese_Bandit_Ring_XY7_056_081_Non_Holo","setName":"Bandit Ring","setNumber":"XY7 056/081","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3cKWa9ooKTMsbTclqmap3LGsmQ4OUfeHdOQ&s"},{"id":"Japanese_Alolan_Moonlight_SM2L_037_050_Non_Holo","setName":"Alolan Moonlight","setNumber":"SM2L 037/050","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://media.okini.land/152884-medium_default/pokemon-tcg-sm2l-037-050-u-whimsicott.jpg"},{"id":"Japanese_Alolan_Moonlight_SM2L_037_050_Reverse_Holo","setName":"Alolan Moonlight","setNumber":"SM2L 037/050","version":"Reverse Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://media.okini.land/152884-medium_default/pokemon-tcg-sm2l-037-050-u-whimsicott.jpg"},{"id":"Japanese_Miracle_Twin_Sm11_063_094_Non_Holo","setName":"Miracle Twin","setNumber":"Sm11 063/094","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://static.tcgcollector.com/content/images/f1/f2/03/f1f203f3494c76c87f927e7515b6c16d1c384bf7f34a0e803762ffbaca5d8a2e.jpg"},{"id":"Japanese_Tag_All_Stars_Sm12a_098_173_Non_Holo","setName":"Tag All Stars","setNumber":"Sm12a 098/173","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://www.coleka.com/media/item/202211/14/sm12a-tag-team-gx-all-stars-whimsicott-sm12a-098-173.webp","localImage":""},{"id":"Japanese_Tag_All_Stars_Sm12a_098_173_Reverse_Holo","setName":"Tag All Stars","setNumber":"Sm12a 098/173","version":"Reverse Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/U8IAAOSw4jhgpusu/s-l400.jpg","localImage":""},{"id":"Japanese_V_Starter_Set_Grass_SA_004_023_Non_Holo","setName":"V Starter Set Grass","setNumber":"SA 004/023","version":"Non Holo","owned":true,"language":"Japanese","notes":"Celebi Starter Deck","imageUrl":"https://static.tcgcollector.com/content/images/93/cf/df/93cfdf1f2c513cf06bcae33a212d24dc28ecc696c8d9821490ec83ec3e5d0269.jpg"},{"id":"Japanese_V_Starter_Set_Grass_SA_004_023_Reverse_Holo","setName":"V Starter Set Grass","setNumber":"SA 004/023","version":"Reverse Holo","owned":true,"language":"Japanese","notes":"Celebi Starter Deck","imageUrl":"https://www.thecardcollector-uk.com/cdn/shop/products/sagrass004_540x.jpg?v=1581601982","localImage":""},{"id":"Japanese_Amazing_Volt_Tackle_s4_050_100_Non_Holo","setName":"Amazing Volt Tackle","setNumber":"s4 050/100","version":"Non Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://www.thecardcollector-uk.com/cdn/shop/products/DSC_0173_e6d29146-5799-4918-913b-ffae80e16e3f_540x.jpg?v=1600976049","localImage":""},{"id":"Japanese_Terastal_Starter_Set_Mewtwo_ex_svEM_008_020_Non_Holo","setName":"Terastal Starter Set Mewtwo ex","setNumber":"svEM 008/020","version":"Non Holo","owned":true,"language":"Japanese","notes":"Mewtwo ex terastal starter deck","imageUrl":"https://www.thecardcollector-uk.com/cdn/shop/files/8_71e11f7c-4576-4051-b356-f13b31ded3fd_540x.jpg?v=1696511384","localImage":""},{"id":"Japanese_Wild_Force_sv5K_008_071_Holo","setName":"Wild Force","setNumber":"sv5K 008/071","version":"Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQWG9z1HtPPl0t0xhl4E3mSo6BmpfwG6ascQ&s"},{"id":"Japanese_Terastal_Fest_ex_sv8A_005_187_Holo","setName":"Terastal Fest ex","setNumber":"sv8A 005/187","version":"Holo","owned":true,"language":"Japanese","notes":"","imageUrl":"https://den-cards.pokellector.com/406/Whimsicott.SV8A.5.55153.png"},{"id":"Japanese_Terastal_Fest_ex_sv8A_005_187_Pokeball","setName":"Terastal Fest ex","setNumber":"sv8A 005/187","version":"Pokeball","owned":true,"language":"Japanese","notes":"","imageUrl":"https://den-cards.pokellector.com/406/Whimsicott.SV8A.5.55357.thumb.png"},{"id":"Japanese_Terastal_Fest_ex_sv8A_005_187_Masterball","setName":"Terastal Fest ex","setNumber":"sv8A 005/187","version":"Masterball","owned":true,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/rPoAAOSwlnBnVWwC/s-l400.jpg"},{"id":"Japanese_Double_Blaze_sm10_066_095","setName":"Double Blaze","setNumber":"sm10 066/095","version":"","owned":true,"language":"Japanese","notes":"GX Half","imageUrl":"https://i.ebayimg.com/images/g/dRwAAOSw-JllX3Sc/s-l1200.jpg"},{"id":"Japanese_Double_Blaze_sm10_103_095","setName":"Double Blaze","setNumber":"sm10 103/095","version":"","owned":true,"language":"Japanese","notes":"Gx Full","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-GX-SR-Double-Blaze-sm10-103-095-Japanese-Single-Card_09527cba-0f0c-4ca3-ab1c-15243d0281ef.webp?v=1743467356"},{"id":"Japanese_Star_Birth_s9_049_100","setName":"Star Birth","setNumber":"s9 049/100","version":"","owned":true,"language":"Japanese","notes":"Half Art","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-V-RR-Star-Birth-s9-049-100-Japanese-Single-Card_940fc240-a22e-41c4-a1fd-ede89c0556ef_512x716.webp?v=1742821882"},{"id":"Japanese_Star_Birth_s9_107_100","setName":"Star Birth","setNumber":"s9 107/100","version":"","owned":true,"language":"Japanese","notes":"Full Art","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-V-SR-Star-Birth-s9-107-100-Japanese-Single-Card.jpg?v=1742822150"},{"id":"Japanese_Star_Birth_s9_050_100","setName":"Star Birth","setNumber":"s9 050/100","version":"","owned":true,"language":"Japanese","notes":"Half Art","imageUrl":"https://i.ebayimg.com/images/g/RucAAOSwyvJh4atM/s-l400.jpg"},{"id":"Japanese_Star_Birth_s9_119_100_Rainbow","setName":"Star Birth","setNumber":"s9 119/100","version":"Rainbow","owned":true,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/00/s/MTYwMFgxMDY2/z/OCsAAOSwg3VisYaC/$_57.JPG?set_id=8800005007"},{"id":"Japanese_White_Flare_sv11W_005_086_Half_Art_Ex","setName":"White Flare","setNumber":"sv11W 005/086","version":"Half Art Ex","owned":true,"language":"Japanese","notes":"Half Art","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-ex-RR-White-Flare-sv11W-005-086-Japanese-Single-Card_6995ac17-f538-40d0-803a-54aa5dd24c9d_502x700.webp?v=1749202763","localImage":""},{"id":"Japanese_White_Flare_sv11W_159_086_Full_Art_Ex","setName":"White Flare","setNumber":"sv11W 159/086","version":"Full Art Ex","owned":true,"language":"Japanese","notes":"Full Art","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-ex-SR-White-Flare-sv11W-159-086-Japanese-Single-Card_33a26a0d-d252-4dec-b0d6-f865d78706b3_496x700.webp?v=1749203489","localImage":""},{"id":"Japanese_Inferno_X________X__M2_038_080_Non_Holo","setName":"Inferno X (インフェルノX)","setNumber":"M2 038/080","version":"Non Holo","owned":false,"language":"Japanese","notes":"","imageUrl":"https://i.ebayimg.com/images/g/cHMAAeSw8E5o2pwo/s-l960.webp","localImage":""},{"id":"Japanese_White_Flare_sv11W_167_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"sv11W 167/086","version":"Special Illustration Rare","owned":true,"language":"Japanese","notes":"Special Illustartion Rare","imageUrl":"https://www.japan2uk.com/cdn/shop/files/Pokemon-Whimsicott-ex-SAR-White-Flare-sv11W-167-086-Japanese-Single-Card_6312d9cb-d9f8-4b61-ad34-b19829e75ffc_494x700.webp?v=1749203527","localImage":""},{"id":"Italian_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/EPO_011_R_IT_SM.png"},{"id":"Italian_Emerging_Powers_11_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Reverse Holo","owned":false,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/EPO_011_R_IT_SM.png"},{"id":"Italian_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/EPO_012_R_IT_SM.png"},{"id":"Italian_Emerging_Powers_12_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/EPO_012_R_IT_SM.png"},{"id":"Italian_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/BCR_015_R_IT_SM.png"},{"id":"Italian_Boundaries_Crossed_15_149_Reverse_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/BCR_015_R_IT_SM.png"},{"id":"Italian_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/AOR_056_R_IT_SM.png"},{"id":"Italian_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/AOR_056_R_IT_SM.png"},{"id":"Italian_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":false,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/FCO_071_R_IT_SM.png"},{"id":"Italian_Fates_Collide_71_124_Reverse_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Reverse Holo","owned":false,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/FCO_071_R_IT_SM.png"},{"id":"Italian_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/GRI_091_R_IT_SM.png"},{"id":"Italian_Guardians_Rising_91_145_Reverse_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/GRI_091_R_IT_SM.png"},{"id":"Italian_Unified_Minds_144_236_Non_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Non Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/UNM_144_R_IT_SM.png"},{"id":"Italian_Unified_Minds_144_236_Reverse_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/UNM_144_R_IT_SM.png"},{"id":"Italian_Cosmic_Eclipse_148_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Non Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/CEC_148_R_IT_SM.png"},{"id":"Italian_Cosmic_Eclipse_148_236_Reverse_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Reverse Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/CEC_148_R_IT_SM.png"},{"id":"Italian_Sword___Shield_006_202_Non_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Non Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/SSH_006_R_IT_SM.png"},{"id":"Italian_Sword___Shield_006_202_Reverse_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/SSH_006_R_IT_SM.png"},{"id":"Italian_Vivid_Voltage_076_185_Non_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Non Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/VIV_076_R_IT_SM.png"},{"id":"Italian_Vivid_Voltage_076_185_Reverse_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Reverse Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/VIV_076_R_IT_SM.png"},{"id":"Italian_Paldean_Fates_035_091_Non_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Non Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/PAF_035_R_IT_SM.png"},{"id":"Italian_Paldean_Fates_035_091_Reverse_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Uncommon","imageUrl":"","localImage":"Images/IT/PAF_035_R_IT_SM.png"},{"id":"Italian_Temporal_Forces_015_162_Reverse_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Reverse Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/TEF_015_R_IT_SM.png"},{"id":"Italian_Temporal_Forces_015_162_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Holo","owned":true,"language":"Italian","notes":"Rare","imageUrl":"","localImage":"Images/IT/TEF_015_R_IT_SM.png"},{"id":"Italian_Prismatic_Evolutions_008_131_Reverse_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Reverse Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"https://federicstore.it/wp-content/uploads/2025/01/008-131r-evoluzioniprismatiche-300x300.png","localImage":""},{"id":"Italian_Prismatic_Evolutions_008_131_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Holo","owned":false,"language":"Italian","notes":"Rare","imageUrl":"https://federicstore.it/wp-content/uploads/2025/01/008-131h-evoluzioniprismatiche-300x300.png","localImage":""},{"id":"Italian_Prismatic_Evolutions_008_131_Pokeball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Pokeball","owned":false,"language":"Italian","notes":"Rare","imageUrl":"https://federicstore.it/wp-content/uploads/2025/01/008-131rm-evoluzioniprismatiche-300x300.png","localImage":""},{"id":"Italian_Prismatic_Evolutions_008_131_Masterball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Masterball","owned":false,"language":"Italian","notes":"Rare","imageUrl":"https://marketplace-article-scans.s3.cardmarket.com/1769675258/1769675258.jpg","localImage":""},{"id":"Italian_Unbroken_Bonds_140_214_Half_Art","setName":"Unbroken Bonds","setNumber":"140/214","version":"Half Art","owned":true,"language":"Italian","notes":"GX","imageUrl":"","localImage":"Images/IT/UNB_140_R_IT_SM.png"},{"id":"Italian_Unbroken_Bonds_206_214_Full_Art","setName":"Unbroken Bonds","setNumber":"206/214","version":"Full Art","owned":true,"language":"Italian","notes":"GX","imageUrl":"","localImage":"Images/IT/UNB_206_R_IT_SM.png"},{"id":"Italian_Unbroken_Bonds_226_214_Rainbow_Rare","setName":"Unbroken Bonds","setNumber":"226/214","version":"Rainbow Rare","owned":false,"language":"Italian","notes":"GX","imageUrl":"","localImage":"Images/IT/UNB_226_R_IT_SM.png"},{"id":"Italian_Brilliant_Stars_064_172_Half_Art","setName":"Brilliant Stars","setNumber":"064/172","version":"Half Art","owned":false,"language":"Italian","notes":"V","imageUrl":"","localImage":"Images/IT/BRS_064_R_IT_SM.png"},{"id":"Italian_Brilliant_Stars_160_172_Full_Art","setName":"Brilliant Stars","setNumber":"160/172","version":"Full Art","owned":false,"language":"Italian","notes":"V","imageUrl":"","localImage":"Images/IT/BRS_160_R_IT_SM.png"},{"id":"Italian_Brilliant_Stars_065_172_Half_Art","setName":"Brilliant Stars","setNumber":"065/172","version":"Half Art","owned":false,"language":"Italian","notes":"Vstar","imageUrl":"","localImage":"Images/IT/BRS_065_R_IT_SM.png"},{"id":"Italian_Brilliant_Stars_175_172_Rainbow_Rare","setName":"Brilliant Stars","setNumber":"175/172","version":"Rainbow Rare","owned":false,"language":"Italian","notes":"Vstar","imageUrl":"","localImage":"Images/IT/BRS_175_R_IT_SM.png"},{"id":"Italian_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped","setName":"Play! Pokemon Prize Pack Series 1","setNumber":"PPS1 VIV 076","version":"Stamped","owned":true,"language":"Italian","notes":"","imageUrl":""},{"id":"Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 065","version":"Stamped","owned":true,"language":"Italian","notes":"","imageUrl":""},{"id":"Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 064","version":"Stamped","owned":false,"language":"Italian","notes":"","imageUrl":""},{"id":"Italian_White_Flare_005_086_Half_Art","setName":"White Flare","setNumber":"005/086","version":"Half Art","owned":false,"language":"Italian","notes":"Ex","imageUrl":"","localImage":"Images/IT/WHT_005_R_IT_SM.png"},{"id":"Italian_White_Flare_157_086_Full_Art","setName":"White Flare","setNumber":"157/086","version":"Full Art","owned":false,"language":"Italian","notes":"Ex","imageUrl":"","localImage":"Images/IT/WHT_157_R_IT_SM.png"},{"id":"Italian_White_Flare_165_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"165/086","version":"Special Illustration Rare","owned":false,"language":"Italian","notes":"Ex","imageUrl":"","localImage":"Images/IT/WHT_165_R_IT_SM.png"},{"id":"Italian_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"Italian","notes":"","imageUrl":""},{"id":"Spanish_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://www.wikidex.net/wiki/Archivo:Whimsicott_(Fuerzas_Emergentes_11_TCG).png","localImage":"Images/ES/EPO_011_R_ES_SM.png"},{"id":"Spanish_Emerging_Powers_11_98_Rev","setName":"Emerging Powers","setNumber":"11/98","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/EPO_011_R_ES_SM.png"},{"id":"Spanish_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/8/8d/latest/20200907153436/Whimsicott_%28Fuerzas_Emergentes_12_TCG%29.png/250px-Whimsicott_%28Fuerzas_Emergentes_12_TCG%29.png","localImage":"Images/ES/EPO_012_R_ES_SM.png"},{"id":"Spanish_Emerging_Powers_12_98_Rev","setName":"Emerging Powers","setNumber":"12/98","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/EPO_012_R_ES_SM.png"},{"id":"Spanish_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":true,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/8/8d/latest/20190328185121/Whimsicott_%28Fronteras_Cruzadas_TCG%29.png/250px-Whimsicott_%28Fronteras_Cruzadas_TCG%29.png","localImage":"Images/ES/BCR_015_R_ES_SM.png"},{"id":"Spanish_Boundaries_Crossed_15_149_Rev","setName":"Boundaries Crossed","setNumber":"15/149","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/BCR_015_R_ES_SM.png"},{"id":"Spanish_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/b/b8/latest/20170920153507/Whimsicott_%28Antiguos_Or%C3%ADgenes_TCG%29.png/250px-Whimsicott_%28Antiguos_Or%C3%ADgenes_TCG%29.png","localImage":"Images/ES/AOR_056_R_ES_SM.png"},{"id":"Spanish_Ancient_Origins_56_98_Rev","setName":"Ancient Origins","setNumber":"56/98","version":"Rev","owned":true,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/AOR_056_R_ES_SM.png"},{"id":"Spanish_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/b/b1/latest/20200120032756/Whimsicott_%28Destinos_Enfrentados_TCG%29.jpg/250px-Whimsicott_%28Destinos_Enfrentados_TCG%29.jpg","localImage":"Images/ES/FCO_071_R_ES_SM.png"},{"id":"Spanish_Fates_Collide_71_124_Rev","setName":"Fates Collide","setNumber":"71/124","version":"Rev","owned":true,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/FCO_071_R_ES_SM.png"},{"id":"Spanish_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/1/16/latest/20170714225619/Whimsicott_%28Albor_de_Guardianes_TCG%29.jpg/250px-Whimsicott_%28Albor_de_Guardianes_TCG%29.jpg","localImage":"Images/ES/GRI_091_R_ES_SM.png"},{"id":"Spanish_Guardians_Rising_91_145_Rev","setName":"Guardians Rising","setNumber":"91/145","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/GRI_091_R_ES_SM.png"},{"id":"Spanish_Unified_Minds_140_214_Half_Art","setName":"Unified Minds","setNumber":"140/214","version":"Half Art","owned":false,"language":"Spanish","notes":"Gx","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/4/45/latest/20190416160904/Whimsicott-GX_%28V%C3%ADnculos_Indestructibles_140_TCG%29.png/250px-Whimsicott-GX_%28V%C3%ADnculos_Indestructibles_140_TCG%29.png"},{"id":"Spanish_Unified_Minds_206_214_Full_Art","setName":"Unified Minds","setNumber":"206/214","version":"Full Art","owned":false,"language":"Spanish","notes":"Gx","imageUrl":""},{"id":"Spanish_Cosmic_Eclipse_226_214_Rainbow","setName":"Cosmic Eclipse","setNumber":"226/214","version":"Rainbow","owned":false,"language":"Spanish","notes":"Gx","imageUrl":""},{"id":"Spanish_Cosmic_Eclipse_114_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"114/236","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/2/22/latest/20191025234915/Whimsicott_%28Mentes_Unidas_TCG%29.png/250px-Whimsicott_%28Mentes_Unidas_TCG%29.png"},{"id":"Spanish_Sword___Shield_114_236_Rev","setName":"Sword & Shield","setNumber":"114/236","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Sword___Shield_148_236_Non_Holo","setName":"Sword & Shield","setNumber":"148/236","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/a/ae/latest/20200503100911/Whimsicott_%28Eclipse_C%C3%B3smico_TCG%29.png/250px-Whimsicott_%28Eclipse_C%C3%B3smico_TCG%29.png"},{"id":"Spanish_Vivid_Voltage_148_236_Rev","setName":"Vivid Voltage","setNumber":"148/236","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Vivid_Voltage_006_202_Non_Holo","setName":"Vivid Voltage","setNumber":"006/202","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/d/d3/latest/20200418011832/Whimsicott_%28Espada_y_Escudo_TCG%29.png/250px-Whimsicott_%28Espada_y_Escudo_TCG%29.png"},{"id":"Spanish_Paldean_Fates_006_202_Rev","setName":"Paldean Fates","setNumber":"006/202","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Paldean_Fates_076_185_Non_Holo","setName":"Paldean Fates","setNumber":"076/185","version":"Non Holo","owned":true,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/6/67/latest/20201120082858/Whimsicott_%28Voltaje_V%C3%ADvido_TCG%29.png/250px-Whimsicott_%28Voltaje_V%C3%ADvido_TCG%29.png"},{"id":"Spanish_Temporal_Forces_076_185_Rev","setName":"Temporal Forces","setNumber":"076/185","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Temporal_Forces_064_172_Half_Art","setName":"Temporal Forces","setNumber":"064/172","version":"Half Art","owned":false,"language":"Spanish","notes":"V","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/9/98/latest/20220226231042/Whimsicott_V_%28Astros_Brillantes_64_TCG%29.png/250px-Whimsicott_V_%28Astros_Brillantes_64_TCG%29.png"},{"id":"Spanish_Prismatic_Evolutions_160_172_Full_Art","setName":"Prismatic Evolutions","setNumber":"160/172","version":"Full Art","owned":false,"language":"Spanish","notes":"V","imageUrl":""},{"id":"Spanish_Prismatic_Evolutions_065_172_Half_Art","setName":"Prismatic Evolutions","setNumber":"065/172","version":"Half Art","owned":false,"language":"Spanish","notes":"Vstar","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/0/0d/latest/20220226232011/Whimsicott_V-ASTRO_%28Astros_Brillantes_65_TCG%29.png/250px-Whimsicott_V-ASTRO_%28Astros_Brillantes_65_TCG%29.png"},{"id":"Spanish_Prismatic_Evolutions_175_172_Rainbow","setName":"Prismatic Evolutions","setNumber":"175/172","version":"Rainbow","owned":false,"language":"Spanish","notes":"Vstar","imageUrl":""},{"id":"Spanish_Prismatic_Evolutions_035_091_Non_Holo","setName":"Prismatic Evolutions","setNumber":"035/091","version":"Non Holo","owned":true,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/0/0d/latest/20220226232011/Whimsicott_V-ASTRO_%28Astros_Brillantes_65_TCG%29.png/250px-Whimsicott_V-ASTRO_%28Astros_Brillantes_65_TCG%29.png"},{"id":"Spanish_Unbroken_Bonds_035_091_Rev","setName":"Unbroken Bonds","setNumber":"035/091","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Temporal_Forces_015_16","setName":"Temporal Forces","setNumber":"015/16","version":"","owned":false,"language":"Spanish","notes":"","imageUrl":"https://images.wikidexcdn.net/mwuploads/wikidex/thumb/f/ff/latest/20240508120435/Whimsicott_%28Fuerzas_Temporales_TCG%29.png/250px-Whimsicott_%28Fuerzas_Temporales_TCG%29.png","localImage":""},{"id":"Spanish_Unbroken_Bonds_015_162_Holo","setName":"Unbroken Bonds","setNumber":"015/162","version":"Holo","owned":true,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Brilliant_Stars_008_131","setName":"Brilliant Stars","setNumber":"008/131","version":"","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Brilliant_Stars_008_131_Holo","setName":"Brilliant Stars","setNumber":"008/131","version":"Holo","owned":true,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Brilliant_Stars_PPS1_VIV_076_Stamped","setName":"Brilliant Stars","setNumber":"PPS1 VIV 076","version":"Stamped","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Brilliant_Stars_PPS2_BRS_064_Stamped","setName":"Brilliant Stars","setNumber":"PPS2 BRS 064","version":"Stamped","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Play__Pokemon_Prize_Pack_Series_1_PPS2_BRS_065_Stamped","setName":"Play! Pokemon Prize Pack Series 1","setNumber":"PPS2 BRS 065","version":"Stamped","owned":false,"language":"Spanish","notes":"","imageUrl":"https://marketplace-article-scans.s3.cardmarket.com/1801117916/1801117916.jpg"},{"id":"Spanish_Play__Pokemon_Prize_Pack_Series_2_005_086_Half_Art","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"005/086","version":"Half Art","owned":false,"language":"Spanish","notes":"Ex","imageUrl":""},{"id":"Spanish_Play__Pokemon_Prize_Pack_Series_2_157_086_Full_Art","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"157/086","version":"Full Art","owned":false,"language":"Spanish","notes":"Ex","imageUrl":""},{"id":"Spanish_White_Flare_165_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"165/086","version":"Special Illustration Rare","owned":false,"language":"Spanish","notes":"Ex","imageUrl":"","localImage":"Images/ES/WHT_165_R_ES_SM.png"},{"id":"Spanish_White_Flare_91_145_Non_Holo","setName":"White Flare","setNumber":"91/145","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_White_Flare_91_145_Rev","setName":"White Flare","setNumber":"91/145","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Mega_Evo_Promo_71_124_Non_Holo","setName":"Mega Evo Promo","setNumber":"71/124","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"Spanish_Fates_Collide_71_124_Rev_2","setName":"Fates Collide","setNumber":"71/124","version":"Rev","owned":false,"language":"Spanish","notes":"","imageUrl":"","localImage":"Images/ES/FCO_071_R_ES_SM.png"},{"id":"Spanish_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"Spanish","notes":"","imageUrl":""},{"id":"German_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"https://www.pokewiki.de/images/thumb/0/02/Elfun_%28Aufstreben_der_M%C3%A4chtigen_11%29.png/430px-Elfun_%28Aufstreben_der_M%C3%A4chtigen_11%29.png?20210316170424","localImage":"Images/DE/EPO_011_R_DE_SM.png"},{"id":"German_Emerging_Powers_11_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Reverse Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"","localImage":"Images/DE/EPO_011_R_DE_SM.png"},{"id":"German_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/thumb/0/07/Elfun_%28Aufstreben_der_M%C3%A4chtigen_12%29.png/430px-Elfun_%28Aufstreben_der_M%C3%A4chtigen_12%29.png?20210316170523","localImage":"Images/DE/EPO_012_R_DE_SM.png"},{"id":"German_Emerging_Powers_12_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/EPO_012_R_DE_SM.png"},{"id":"German_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/thumb/3/3b/Elfun_%28%C3%9Cberschrittene_Schwellen_15%29.png/430px-Elfun_%28%C3%9Cberschrittene_Schwellen_15%29.png?20210329141200","localImage":"Images/DE/BCR_015_R_DE_SM.png"},{"id":"German_Boundaries_Crossed_15_149_Reverse_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/BCR_015_R_DE_SM.png"},{"id":"German_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"https://www.pokewiki.de/images/thumb/2/2e/Elfun_%28Ewiger_Anfang_56%29.png/430px-Elfun_%28Ewiger_Anfang_56%29.png?20210412115427","localImage":"Images/DE/AOR_056_R_DE_SM.png"},{"id":"German_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"","localImage":"Images/DE/AOR_056_R_DE_SM.png"},{"id":"German_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"https://www.pokewiki.de/images/thumb/4/41/Elfun_%28Schicksalsschmiede_71%29.png/430px-Elfun_%28Schicksalsschmiede_71%29.png?20210420085750","localImage":"Images/DE/FCO_071_R_DE_SM.png"},{"id":"German_Fates_Collide_71_124_Reverse_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Reverse Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"","localImage":"Images/DE/FCO_071_R_DE_SM.png"},{"id":"German_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"https://www.pokewiki.de/images/thumb/8/8f/Elfun_%28Stunde_der_W%C3%A4chter_91%29.png/430px-Elfun_%28Stunde_der_W%C3%A4chter_91%29.png?20210428142124","localImage":"Images/DE/GRI_091_R_DE_SM.png"},{"id":"German_Guardians_Rising_91_145_Reverse_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Reverse Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"","localImage":"Images/DE/GRI_091_R_DE_SM.png"},{"id":"German_Unified_Minds_144_236_Non_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/thumb/5/57/Elfun_%28Bund_der_Gleichgesinnten_144%29.png/430px-Elfun_%28Bund_der_Gleichgesinnten_144%29.png?20210512165554","localImage":"Images/DE/UNM_144_R_DE_SM.png"},{"id":"German_Unified_Minds_144_236_Reverse_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/UNM_144_R_DE_SM.png"},{"id":"German_Cosmic_Eclipse_148_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/5/5a/Elfun_%28Welten_im_Wandel_148%29.png?20191101160555","localImage":"Images/DE/CEC_148_R_DE_SM.png"},{"id":"German_Cosmic_Eclipse_148_236_Reverse_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/CEC_148_R_DE_SM.png"},{"id":"German_Sword___Shield_006_202_Non_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/d/d2/Elfun_%28Schwert_%26_Schild_006%29.png?20200207173510","localImage":"Images/DE/SSH_006_R_DE_SM.png"},{"id":"German_Sword___Shield_006_202_Reverse_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/SSH_006_R_DE_SM.png"},{"id":"German_Vivid_Voltage_076_185_Non_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Non Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/thumb/0/04/Elfun_%28Farbenschock_076%29.png/430px-Elfun_%28Farbenschock_076%29.png?20210515093537","localImage":"Images/DE/VIV_076_R_DE_SM.png"},{"id":"German_Vivid_Voltage_076_185_Reverse_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/VIV_076_R_DE_SM.png"},{"id":"German_Paldean_Fates_035_091_Non_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Non Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"https://www.pokewiki.de/images/thumb/9/9d/Elfun_%28Paldeas_Schicksale_035%29.png/430px-Elfun_%28Paldeas_Schicksale_035%29.png?20240125233206","localImage":"Images/DE/PAF_035_R_DE_SM.png"},{"id":"German_Paldean_Fates_035_091_Reverse_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Reverse Holo","owned":false,"language":"German","notes":"Uncommon","imageUrl":"","localImage":"Images/DE/PAF_035_R_DE_SM.png"},{"id":"German_Temporal_Forces_015_162_Reverse_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":"https://www.pokewiki.de/images/thumb/9/9f/Elfun_%28Gewalten_der_Zeit_015%29.png/430px-Elfun_%28Gewalten_der_Zeit_015%29.png?20240322080523","localImage":"Images/DE/TEF_015_R_DE_SM.png"},{"id":"German_Temporal_Forces_015_162_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Holo","owned":true,"language":"German","notes":"Rare","imageUrl":"","localImage":"Images/DE/TEF_015_R_DE_SM.png"},{"id":"German_Prismatic_Evolutions_008_131_Reverse_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Reverse Holo","owned":false,"language":"German","notes":"Rare","imageUrl":""},{"id":"German_Prismatic_Evolutions_008_131_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Holo","owned":false,"language":"German","notes":"Rare","imageUrl":""},{"id":"German_Prismatic_Evolutions_008_131_Pokeball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Pokeball","owned":false,"language":"German","notes":"Rare","imageUrl":""},{"id":"German_Prismatic_Evolutions_008_131_Masterball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Masterball","owned":false,"language":"German","notes":"Rare","imageUrl":"https://i.ibb.co/fzYkgsqG/Dutch-Master-Balljpg.jpg","localImage":""},{"id":"German_Unbroken_Bonds_140_214_Half_Art","setName":"Unbroken Bonds","setNumber":"140/214","version":"Half Art","owned":false,"language":"German","notes":"GX","imageUrl":"https://www.pokewiki.de/images/thumb/7/7c/Elfun-GX_%28Kr%C3%A4fte_im_Einklang_140%29.png/430px-Elfun-GX_%28Kr%C3%A4fte_im_Einklang_140%29.png?20210511141748","localImage":"Images/DE/UNB_140_R_DE_SM.png"},{"id":"German_Unbroken_Bonds_206_214_Full_Art","setName":"Unbroken Bonds","setNumber":"206/214","version":"Full Art","owned":true,"language":"German","notes":"GX","imageUrl":"https://www.pokewiki.de/images/thumb/6/67/Elfun-GX_%28Kr%C3%A4fte_im_Einklang_206%29.png/430px-Elfun-GX_%28Kr%C3%A4fte_im_Einklang_206%29.png?20210511144912","localImage":"Images/DE/UNB_206_R_DE_SM.png"},{"id":"German_Unbroken_Bonds_226_214_Rainbow_Rare","setName":"Unbroken Bonds","setNumber":"226/214","version":"Rainbow Rare","owned":false,"language":"German","notes":"GX","imageUrl":"https://marketplace-article-scans.s3.cardmarket.com/1452749764/1452749764.jpg","localImage":"Images/DE/UNB_226_R_DE_SM.png"},{"id":"German_Brilliant_Stars_064_172_Half_Art","setName":"Brilliant Stars","setNumber":"064/172","version":"Half Art","owned":false,"language":"German","notes":"V","imageUrl":"https://www.pokewiki.de/images/thumb/2/22/Elfun-V_%28Strahlende_Sterne_064%29.png/430px-Elfun-V_%28Strahlende_Sterne_064%29.png?20220225133022","localImage":"Images/DE/BRS_064_R_DE_SM.png"},{"id":"German_Brilliant_Stars_160_172_Full_Art","setName":"Brilliant Stars","setNumber":"160/172","version":"Full Art","owned":false,"language":"German","notes":"V","imageUrl":"https://www.pokewiki.de/images/thumb/5/57/Elfun-V_%28Strahlende_Sterne_160%29.png/430px-Elfun-V_%28Strahlende_Sterne_160%29.png?20220225133605","localImage":"Images/DE/BRS_160_R_DE_SM.png"},{"id":"German_Brilliant_Stars_065_172_Half_Art","setName":"Brilliant Stars","setNumber":"065/172","version":"Half Art","owned":false,"language":"German","notes":"Vstar","imageUrl":"https://www.pokewiki.de/images/thumb/f/f4/Elfun-VSTAR_%28Strahlende_Sterne_065%29.png/430px-Elfun-VSTAR_%28Strahlende_Sterne_065%29.png?20220225130032","localImage":"Images/DE/BRS_065_R_DE_SM.png"},{"id":"German_Brilliant_Stars_175_172_Rainbow_Rare","setName":"Brilliant Stars","setNumber":"175/172","version":"Rainbow Rare","owned":false,"language":"German","notes":"Vstar","imageUrl":"https://www.pokewiki.de/images/thumb/8/82/Elfun-VSTAR_%28Strahlende_Sterne_175%29.png/430px-Elfun-VSTAR_%28Strahlende_Sterne_175%29.png?20220225133646","localImage":"Images/DE/BRS_175_R_DE_SM.png"},{"id":"German_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped","setName":"Play! Pokemon Prize Pack Series 1","setNumber":"PPS1 VIV 076","version":"Stamped","owned":false,"language":"German","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/PRZP/DE/48.jpg?class=original","localImage":""},{"id":"German_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 065","version":"Stamped","owned":false,"language":"German","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/PRZP/DE/196.jpg?class=original","localImage":""},{"id":"German_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 064","version":"Stamped","owned":true,"language":"German","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/PRZP/DE/196.jpg?class=original","localImage":""},{"id":"German_White_Flare_005_086_Half_Art","setName":"White Flare","setNumber":"005/086","version":"Half Art","owned":false,"language":"German","notes":"Ex","imageUrl":"","localImage":"Images/DE/WHT_005_R_DE_SM.png"},{"id":"German_White_Flare_157_086_Full_Art","setName":"White Flare","setNumber":"157/086","version":"Full Art","owned":false,"language":"German","notes":"Ex","imageUrl":"","localImage":"Images/DE/WHT_157_R_DE_SM.png"},{"id":"German_White_Flare_165_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"165/086","version":"Special Illustration Rare","owned":false,"language":"German","notes":"Ex","imageUrl":"","localImage":"Images/DE/WHT_165_R_DE_SM.png"},{"id":"German_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"German","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/MEP/DE/19.jpg?class=original","localImage":""},{"id":"French_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/EPO/11.jpg?class=sd","localImage":"Images/FR/EPO_011_R_FR_SM.png"},{"id":"French_Emerging_Powers_11_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Reverse Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"","localImage":"Images/FR/EPO_011_R_FR_SM.png"},{"id":"French_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/EPO/12.jpg?class=sd","localImage":"Images/FR/EPO_012_R_FR_SM.png"},{"id":"French_Emerging_Powers_12_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/EPO_012_R_FR_SM.png"},{"id":"French_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/BCR/15.jpg?class=sd","localImage":"Images/FR/BCR_015_R_FR_SM.png"},{"id":"French_Boundaries_Crossed_15_149_Reverse_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/BCR_015_R_FR_SM.png"},{"id":"French_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/AOR/56.jpg?class=sd","localImage":"Images/FR/AOR_056_R_FR_SM.png"},{"id":"French_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"","localImage":"Images/FR/AOR_056_R_FR_SM.png"},{"id":"French_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/FAC/71.jpg?class=sd","localImage":"Images/FR/FCO_071_R_FR_SM.png"},{"id":"French_Fates_Collide_71_124_Reverse_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Reverse Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"","localImage":"Images/FR/FCO_071_R_FR_SM.png"},{"id":"French_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM02/91.jpg?class=sd","localImage":"Images/FR/GRI_091_R_FR_SM.png"},{"id":"French_Guardians_Rising_91_145_Reverse_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Reverse Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"","localImage":"Images/FR/GRI_091_R_FR_SM.png"},{"id":"French_Unified_Minds_144_236_Non_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM11/144.jpg?class=sd","localImage":"Images/FR/UNM_144_R_FR_SM.png"},{"id":"French_Unified_Minds_144_236_Reverse_Holo","setName":"Unified Minds","setNumber":"144/236","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/UNM_144_R_FR_SM.png"},{"id":"French_Cosmic_Eclipse_148_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM12/148.jpg?class=sd","localImage":"Images/FR/CEC_148_R_FR_SM.png"},{"id":"French_Cosmic_Eclipse_148_236_Reverse_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/CEC_148_R_FR_SM.png"},{"id":"French_Sword___Shield_006_202_Non_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SWSH1/6.jpg?class=sd","localImage":"Images/FR/SSH_006_R_FR_SM.png"},{"id":"French_Sword___Shield_006_202_Reverse_Holo","setName":"Sword & Shield","setNumber":"006/202","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/SSH_006_R_FR_SM.png"},{"id":"French_Vivid_Voltage_076_185_Non_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Non Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SWSH4/76.jpg?class=sd","localImage":"Images/FR/VIV_076_R_FR_SM.png"},{"id":"French_Vivid_Voltage_076_185_Reverse_Holo","setName":"Vivid Voltage","setNumber":"076/185","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/VIV_076_R_FR_SM.png"},{"id":"French_Paldean_Fates_035_091_Non_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Non Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/PAF/35.jpg?class=sd","localImage":"Images/FR/PAF_035_R_FR_SM.png"},{"id":"French_Paldean_Fates_035_091_Reverse_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Reverse Holo","owned":false,"language":"French","notes":"Uncommon","imageUrl":"","localImage":"Images/FR/PAF_035_R_FR_SM.png"},{"id":"French_Temporal_Forces_015_162_Reverse_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/TEF/15.jpg?class=sd","localImage":"Images/FR/TEF_015_R_FR_SM.png"},{"id":"French_Temporal_Forces_015_162_Holo","setName":"Temporal Forces","setNumber":"015/162","version":"Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"","localImage":"Images/FR/TEF_015_R_FR_SM.png"},{"id":"French_Prismatic_Evolutions_008_131_Reverse_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Reverse Holo","owned":false,"language":"French","notes":"Rare","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/PRE/8.jpg?class=sd"},{"id":"French_Prismatic_Evolutions_008_131_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Holo","owned":false,"language":"French","notes":"Rare","imageUrl":""},{"id":"French_Prismatic_Evolutions_008_131_Pokeball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Pokeball","owned":false,"language":"French","notes":"Rare","imageUrl":"https://img.leboncoin.fr/api/v1/lbcpb1/images/86/0e/82/860e828baf9c18376eee5292914e0bf9cebbdf55.jpg?rule=ad-large","localImage":""},{"id":"French_Prismatic_Evolutions_008_131_Masterball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Masterball","owned":false,"language":"French","notes":"Rare","imageUrl":"https://thumbs.coleka.com/media/item/202501/22/evolutions-prismatiques-prefr-farfaduvet-reverse-master-ball-008-131-001_470x246.webp","localImage":""},{"id":"French_Unbroken_Bonds_140_214_Half_Art","setName":"Unbroken Bonds","setNumber":"140/214","version":"Half Art","owned":false,"language":"French","notes":"GX","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM10/140.jpg?class=sd","localImage":"Images/FR/UNB_140_R_FR_SM.png"},{"id":"French_Unbroken_Bonds_206_214_Full_Art","setName":"Unbroken Bonds","setNumber":"206/214","version":"Full Art","owned":false,"language":"French","notes":"GX","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM10/206.jpg?class=sd","localImage":"Images/FR/UNB_206_R_FR_SM.png"},{"id":"French_Unbroken_Bonds_226_214_Rainbow_Rare","setName":"Unbroken Bonds","setNumber":"226/214","version":"Rainbow Rare","owned":false,"language":"French","notes":"GX","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/SM10/226.jpg?class=sd","localImage":"Images/FR/UNB_226_R_FR_SM.png"},{"id":"French_Brilliant_Stars_064_172_Half_Art","setName":"Brilliant Stars","setNumber":"064/172","version":"Half Art","owned":false,"language":"French","notes":"V","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/BRS/64.jpg?class=sd","localImage":"Images/FR/BRS_064_R_FR_SM.png"},{"id":"French_Brilliant_Stars_160_172_Full_Art","setName":"Brilliant Stars","setNumber":"160/172","version":"Full Art","owned":false,"language":"French","notes":"V","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/BRS/160.jpg?class=sd","localImage":"Images/FR/BRS_160_R_FR_SM.png"},{"id":"French_Brilliant_Stars_065_172_Half_Art","setName":"Brilliant Stars","setNumber":"065/172","version":"Half Art","owned":false,"language":"French","notes":"Vstar","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/BRS/65.jpg?class=sd","localImage":"Images/FR/BRS_065_R_FR_SM.png"},{"id":"French_Brilliant_Stars_175_172_Rainbow_Rare","setName":"Brilliant Stars","setNumber":"175/172","version":"Rainbow Rare","owned":false,"language":"French","notes":"Vstar","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/BRS/175.jpg?class=sd","localImage":"Images/FR/BRS_175_R_FR_SM.png"},{"id":"French_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped","setName":"Play! Pokemon Prize Pack Series 1","setNumber":"PPS1 VIV 076","version":"Stamped","owned":false,"language":"French","notes":"","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/PRZP/48.jpg?class=sd"},{"id":"French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 065","version":"Stamped","owned":false,"language":"French","notes":"","imageUrl":"https://pokecardex.b-cdn.net/assets/images/sets/PRZP/196.jpg?class=sd"},{"id":"French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped","setName":"Play! Pokemon Prize Pack Series 2","setNumber":"PPS2 BRS 064","version":"Stamped","owned":false,"language":"French","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/PRZP/FR/197.jpg?class=original","localImage":""},{"id":"French_White_Flare_005_086_Half_Art","setName":"White Flare","setNumber":"005/086","version":"Half Art","owned":false,"language":"French","notes":"Ex","imageUrl":"","localImage":"Images/FR/WHT_005_R_FR_SM.png"},{"id":"French_White_Flare_157_086_Full_Art","setName":"White Flare","setNumber":"157/086","version":"Full Art","owned":false,"language":"French","notes":"Ex","imageUrl":"","localImage":"Images/FR/WHT_157_R_FR_SM.png"},{"id":"French_White_Flare_165_086_Special_Illustration_Rare","setName":"White Flare","setNumber":"165/086","version":"Special Illustration Rare","owned":false,"language":"French","notes":"Ex","imageUrl":"","localImage":"Images/FR/WHT_165_R_FR_SM.png"},{"id":"French_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"French","notes":"","imageUrl":"https://pokecardex-scans.b-cdn.net/sets/MEP/FR/19.jpg?class=original","localImage":""},{"id":"Korean_Wild_Force_sv5K_008","setName":"Wild Force","setNumber":"sv5K 008","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SV/SV5K/SV5K_008.png?w=400"},{"id":"Korean_Terastal_Festival_ex_sv8a_005_Holo","setName":"Terastal Festival ex","setNumber":"sv8a 005","version":"Holo","owned":true,"language":"Korean","notes":"Terrastal Festa Ex","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SV/SV8a/SV8a_005.png?w=400"},{"id":"Korean_Terastal_Festival_ex_sv8a_005_Pokeball","setName":"Terastal Festival ex","setNumber":"sv8a 005","version":"Pokeball","owned":true,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SV/SV8a/SV8a_005_m.png?w=400"},{"id":"Korean_Terastal_Festival_ex_sv8a_005_Masterball","setName":"Terastal Festival ex","setNumber":"sv8a 005","version":"Masterball","owned":false,"language":"Korean","notes":"","imageUrl":"https://i.ibb.co/CdbjvsD/KOmasterball.jpg","localImage":""},{"id":"Korean_Scarlet_Violet_starter_set_terrastal_Mewtwo_ex_svEM_008_020","setName":"Scarlet Violet starter set terrastal Mewtwo ex","setNumber":"svEM 008/020","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SV/SVEM/SVEM_008.png?w=400"},{"id":"Korean_Starverse_s9_107_100_Full_Art","setName":"Starverse","setNumber":"s9 107/100","version":"Full Art","owned":false,"language":"Korean","notes":"V","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/S9/S9_107.png?w=400"},{"id":"Korean_Starverse_s9_050_100_Half_Art","setName":"Starverse","setNumber":"s9 050/100","version":"Half Art","owned":false,"language":"Korean","notes":"Vstar","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/S9/S9_050.png?w=400"},{"id":"Korean_Starverse_s9_049_100_Half_Art","setName":"Starverse","setNumber":"s9 049/100","version":"Half Art","owned":true,"language":"Korean","notes":"V","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/S9/S9_049.png?w=400"},{"id":"Korean_Volt_Tackle_Of_The_Heavens_s4_050_100","setName":"Volt Tackle Of The Heavens","setNumber":"s4 050/100","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/S4/S4_050.png?w=400"},{"id":"Korean_Sword___Shield_Starter_Set_V_Full_sA_004_023","setName":"Sword & Shield Starter Set V Full","setNumber":"sA 004/023","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/SA/SA_G_004.png?w=400"},{"id":"Korean_Sun___Moon_High_Class_Pack__TAG_TEAM_GX_Tag_All_Stars__sm12a_098_173_Reverse","setName":"Sun & Moon High Class Pack 「TAG TEAM GX Tag All Stars」","setNumber":"sm12a 098/173","version":"Reverse","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM12a/SM12a_098.png?w=400"},{"id":"Korean_Miracle_Twin_sm11_063_094","setName":"Miracle Twin","setNumber":"sm11 063/094","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM11/SM11_063.png?w=400"},{"id":"Korean_Double_Blaze_sm10_103_095_Full_Art","setName":"Double Blaze","setNumber":"sm10 103/095","version":"Full Art","owned":false,"language":"Korean","notes":"GX","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM10/SM10_103.png?w=400"},{"id":"Korean_Double_Blaze_sm10_066_095_Half_Art","setName":"Double Blaze","setNumber":"sm10 066/095","version":"Half Art","owned":false,"language":"Korean","notes":"Gx","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM10/SM10_066.png?w=400"},{"id":"Korean_XY_BREAK_Mega_Battle_60-Card_Deck__M_Dabuni_EX__XYh_007_026","setName":"XY BREAK Mega Battle 60-Card Deck \"M Dabuni EX\"","setNumber":"XYh 007/026","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/XY/XYH/XYH_007.png?w=512"},{"id":"Korean_Sun___Moon_Reinforcement_Expansion_Pack__New_Trial__sm2__042_049_Non_Holo","setName":"Sun & Moon Reinforcement Expansion Pack \"New Trial\"","setNumber":"sm2+ 042/049","version":"Non Holo","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM2+/SM2plus_102.png?w=400"},{"id":"Korean_Sun___Moon_Reinforcement_Expansion_Pack__New_Trial__sm2__042_049_Reverse","setName":"Sun & Moon Reinforcement Expansion Pack \"New Trial\"","setNumber":"sm2+ 042/049","version":"Reverse","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM2+/SM2plus_042.png?w=400"},{"id":"Korean_Sun___Moon_Expansion_Pack_2nd_Edition__Moonlight_of_Alola__sm2L_037_050","setName":"Sun & Moon Expansion Pack 2nd Edition \"Moonlight of Alola\"","setNumber":"sm2L 037/050","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/SM/SM2L/SM2L_037.png?w=400"},{"id":"Korean_XY_Expansion_Pack_7__Bandit_Ring__XY7_056_081","setName":"XY Expansion Pack 7 \"Bandit Ring\"","setNumber":"XY7 056/081","version":"","owned":true,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/XY/XY7/XY7_056.jpg?w=400"},{"id":"Korean_BW_Expansion_Pack_6__Freeze_Bolt__BW6_009_059","setName":"BW Expansion Pack 6 \"Freeze Bolt\"","setNumber":"BW6 009/059","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/BW/BW6/bw6_freezevolt_009.jpg?w=400"},{"id":"Korean_BW_Expansion_Pack_1__Black_Collection__BW1_005_053","setName":"BW Expansion Pack 1 \"Black Collection\"","setNumber":"BW1 005/053","version":"","owned":false,"language":"Korean","notes":"","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/BW/BW1/bw1_black_005.jpg?w=400"},{"id":"Korean_Starverse_s9_119_100_Rainbow","setName":"Starverse","setNumber":"s9 119/100","version":"Rainbow","owned":false,"language":"Korean","notes":"Vstar","imageUrl":"https://cards.image.pokemonkorea.co.kr/data/wmimages/S/S9/S9_119.png?w=400"},{"id":"Korean_Inferno_X_______X__038_080_Non_Holo","setName":"Inferno X (인페르노 X)","setNumber":"038/080","version":"Non Holo","owned":true,"language":"Korean","notes":"","imageUrl":"https://i.ebayimg.com/images/g/4swAAeSwl4xpkO5P/s-l1600.webp","localImage":""},{"id":"Korean_White_Flare_SV11W_Half_Art","setName":"White Flare","setNumber":"SV11W","version":"Half Art","owned":true,"language":"Korean","notes":"Ex","imageUrl":"https://i.ebayimg.com/images/g/ty0AAeSwUJ1pF7uX/s-l1600.webp","localImage":""},{"id":"Korean_White_Flare_SV11W_Full_Art","setName":"White Flare","setNumber":"SV11W","version":"Full Art","owned":false,"language":"Korean","notes":"Ex","imageUrl":"https://i.ebayimg.com/images/g/nWAAAeSwNaJpGd~F/s-l500.webp","localImage":""},{"id":"Korean_White_Flare_SV11W_Special_Illustration_Rare","setName":"White Flare","setNumber":"SV11W","version":"Special Illustration Rare","owned":true,"language":"Korean","notes":"Ex","imageUrl":"https://i.ebayimg.com/images/g/mUgAAeSwEYJpnBtG/s-l500.webp","localImage":""},{"id":"Korean_Starter_Deck_100","setName":"Starter Deck 100","setNumber":"","version":"","owned":false,"language":"Korean","notes":"","imageUrl":""},{"id":"Thai_Double_Burst_Set_B_AS5B_138_186_Half_Art","setName":"Double Burst Set B","setNumber":"AS5B 138/186","version":"Half Art","owned":false,"language":"Thai","notes":"Gx","imageUrl":""},{"id":"Thai_Double_Burst_Set_B_AS5B_201_186_Full_Art","setName":"Double Burst Set B","setNumber":"AS5B 201/186","version":"Full Art","owned":false,"language":"Thai","notes":"Gx","imageUrl":""},{"id":"Thai_Double_Burst_Set_B_AS5B_220_186_Rainbow","setName":"Double Burst Set B","setNumber":"AS5B 220/186","version":"Rainbow","owned":false,"language":"Thai","notes":"Gx","imageUrl":""},{"id":"Thai_Double_Burst_Starter_Deck_AS5D_115_169","setName":"Double Burst Starter Deck","setNumber":"AS5D 115/169","version":"","owned":false,"language":"Thai","notes":"Gx Released In Starter Deck","imageUrl":""},{"id":"Thai_ex_Compact_Deck_077_163","setName":"ex Compact Deck","setNumber":"077/163","version":"","owned":false,"language":"Thai","notes":"Deck? I think\nhttps://bulbapedia.bulbagarden.net/wiki/Ex_Compact_Deck_(ATCG)","imageUrl":""},{"id":"Thai_ex______________svDs_T_077_163_Non_Holo","setName":"ex คอมแพกต์เด็ค","setNumber":"svDs T 077/163","version":"Non Holo","owned":false,"language":"Thai","notes":"","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00006722.png"},{"id":"Thai_First_Impact_GX_Starter_Deck_AS1D_097_140","setName":"First Impact GX Starter Deck","setNumber":"AS1D 097/140","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_First_Impact_Set_B_AS1B_097_150","setName":"First Impact Set B","setNumber":"AS1B 097/150","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Inferno_X_038_080_Non_Holo","setName":"Inferno X","setNumber":"038/080","version":"Non Holo","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Legendary_Clash_Set_A_AS6A_130_196","setName":"Legendary Clash Set A","setNumber":"AS6A 130/196","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Legendary_Clash_Set_A_AS6A_131_196","setName":"Legendary Clash Set A","setNumber":"AS6A 131/196","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_ma2T_ma2T_041_103_Non_Holo","setName":"ma2T","setNumber":"ma2T 041/103","version":"Non Holo","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Shiny_VMAX_Collection_Set_B_SC3B_048_158","setName":"Shiny VMAX Collection Set B","setNumber":"SC3B 048/158","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv11sT_sv11sT_010_172_Half_art_ex","setName":"sv11sT","setNumber":"sv11sT 010/172","version":"Half art ex","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv11st_sv11st_318_172_Fullart_Ex","setName":"sv11st","setNumber":"sv11st 318/172","version":"Fullart Ex","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv11sT_sv11sT_334_172_SAR_Special_Illustartion_Rare","setName":"sv11sT","setNumber":"sv11sT 334/172","version":"SAR Special Illustartion Rare","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv5kT_sv5kT_008_071_Holo","setName":"sv5kT","setNumber":"sv5kT 008/071","version":"Holo","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv8aT_sv8aT_005_187_Pokeball","setName":"sv8aT","setNumber":"sv8aT 005/187","version":"Pokeball","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_sv8aT_sv8aT_005_187_Holo","setName":"sv8aT","setNumber":"sv8aT 005/187","version":"Holo","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_svDsT_svDsT_077_163_Non_Holo","setName":"svDsT","setNumber":"svDsT 077/163","version":"Non Holo","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Sword___Shield_V_Starter_Deck_SC1D_007_164","setName":"Sword & Shield V Starter Deck","setNumber":"SC1D 007/164","version":"","owned":false,"language":"Thai","notes":"Starter Deck","imageUrl":""},{"id":"Thai______VMAX_______________B_sc3b_T_048_158","setName":"ไชนี VMAX คอลเลกชัน ชุด B","setNumber":"sc3b T 048/158","version":"","owned":false,"language":"Thai","notes":"","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00000928.png"},{"id":"Thai_______________ex_sv8a_T_005_187_Holo","setName":"เทศกาลเทรัสตัลex","setNumber":"sv8a T 005/187","version":"Holo","owned":false,"language":"Thai","notes":"","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00010689.png"},{"id":"Thai_______________ex_sv8a_T_005_187_Pokeball","setName":"เทศกาลเทรัสตัลex","setNumber":"sv8a T 005/187","version":"Pokeball","owned":false,"language":"Thai","notes":"","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00010894.png"},{"id":"Thai_____________s9_T_049_100_Half_Art","setName":"สตาร์เบิร์ท","setNumber":"s9 T 049/100","version":"Half Art","owned":false,"language":"Thai","notes":"V","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00002575.png"},{"id":"Thai_____________s9_T_050_100_Half_Art","setName":"สตาร์เบิร์ท","setNumber":"s9 T 050/100","version":"Half Art","owned":false,"language":"Thai","notes":"Vstar","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00002576.png"},{"id":"Thai_____________sv5K_008_071_Holo","setName":"อำนาจอนารยะ","setNumber":"sv5K 008/071","version":"Holo","owned":false,"language":"Thai","notes":"","imageUrl":"https://asia.pokemon-card.com/th/card-img/th00007833.png"},{"id":"Thai_Starbirth_107","setName":"Starbirth","setNumber":"107","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Starbirth_119","setName":"Starbirth","setNumber":"119","version":"","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Thai_Terastal_Festival_Masterball","setName":"Terastal Festival","setNumber":"","version":"Masterball","owned":false,"language":"Thai","notes":"","imageUrl":""},{"id":"Indonesian_Gym_Promo_279_S-P_Indonesian_Promo_Stamped_Gym_Promo","setName":"Gym Promo","setNumber":"279/S-P Indonesian Promo","version":"Stamped Gym Promo","owned":true,"language":"Indonesian","notes":"Event Stamp","imageUrl":"https://cdn6966.templcdn.com/wp-content/uploads/2022/07/ID_279S-P.png","localImage":"Images/PROMO_ID_279-S-P.png"},{"id":"Indonesian_MA2_I_041_103_Non_Holo","setName":"MA2 I","setNumber":"041/103","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00016855.png","localImage":"Images/id00016855.png"},{"id":"Indonesian_sv11s_I_010_172_Half_Art_Ex","setName":"sv11s I","setNumber":"010/172","version":"Half Art Ex","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00016149.png","localImage":"Images/id00016149.png"},{"id":"Indonesian_sv11s_I_318_172_Full_Art_Ex","setName":"sv11s I","setNumber":"318/172","version":"Full Art Ex","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00016457.png","localImage":"Images/id00016457.png"},{"id":"Indonesian_sv11s_I_334_172_Special_Illustrartion_Rare_Ex","setName":"sv11s I","setNumber":"334/172","version":"Special Illustrartion Rare Ex","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00016473.png","localImage":"Images/id00016473.png"},{"id":"Indonesian_sv8a_I_005_187_Holo","setName":"sv8a I","setNumber":"005/187","version":"Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00014977.png","localImage":"Images/id00014977.png"},{"id":"Indonesian_sv8a_I_005_187_Pokeball_Rev","setName":"sv8a I","setNumber":"005/187","version":"Pokeball Rev","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00015434.png","localImage":"Images/id00015434.png"},{"id":"Indonesian_sv5s_I_015_142_Holo","setName":"sv5s I","setNumber":"015/142","version":"Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00010298.png","localImage":"Images/id00010298.png"},{"id":"Indonesian_svDs_I_077_163_Non_Holo","setName":"svDs I","setNumber":"077/163","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00009418.png","localImage":"Images/id00009418.png"},{"id":"Indonesian_sc3b_I_048_158_Non_Holo","setName":"sc3b I","setNumber":"048/158","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00003904.png","localImage":"Images/id00003904.png"},{"id":"Indonesian_s9_I_050_100_Half_Art_Vstar","setName":"s9 I","setNumber":"050/100","version":"Half Art Vstar","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00005307.png","localImage":"Images/id00005307.png"},{"id":"Indonesian_s9_I_049_100_Half_Art_V","setName":"s9 I","setNumber":"049/100","version":"Half Art V","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00005306.png","localImage":"Images/id00005306.png"},{"id":"Indonesian_sc1D_I_007_164_Non_Holo","setName":"sc1D I","setNumber":"007/164","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00000640.png","localImage":"Images/id00000640.png"},{"id":"Indonesian_AC3a_122_205_Non_Holo","setName":"AC3a","setNumber":"122/205","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00002108.png","localImage":"Images/ac3a_ID_122-205.png"},{"id":"Indonesian_AC3a_123_205_Half_Art_Gx","setName":"AC3a","setNumber":"123/205","version":"Half Art Gx","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00002194.png","localImage":"Images/ac3a_ID_123-205.png"},{"id":"Indonesian_AS1D_097_140_Non_Holo","setName":"AS1D","setNumber":"097/140","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00003455.png","localImage":"Images/as1D_ID_097-140.png"},{"id":"Indonesian_AS1B_097_150_Non_Holo","setName":"AS1B","setNumber":"097/150","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00001590.png","localImage":"Images/as1b_ID_097-150.png"},{"id":"Indonesian_AC3D_115_172_Non_Holo","setName":"AC3D","setNumber":"115/172","version":"Non Holo","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://asia.pokemon-card.com/id/card-img/id00002496.png","localImage":"Images/id00002496.png"},{"id":"Indonesian_Tag_Team_Collection_AC3A_244_Full_Art_Gx","setName":"Tag Team Collection AC3A","setNumber":"244","version":"Full Art Gx","owned":false,"language":"Indonesian","notes":"","imageUrl":"","localImage":"Images/ac3a_ID_244-205.png"},{"id":"Indonesian_Tag_Team_Collection_AC3A_287_Rainbow","setName":"Tag Team Collection AC3A","setNumber":"287","version":"Rainbow","owned":false,"language":"Indonesian","notes":"","imageUrl":"","localImage":"Images/AC3A_ID_287-205.png"},{"id":"Indonesian_Star_Birth_107","setName":"Star Birth","setNumber":"107","version":"","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://i.ibb.co/M5sVfHWQ/Messenger-creation-D3-C4-AFDE-2-C96-4267-976-F-FD1-F488-BC558.jpg","localImage":""},{"id":"Indonesian_Star_Birth_119","setName":"Star Birth","setNumber":"119","version":"","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://i.ibb.co/Z1hXHq3T/Messenger-creation-76067-C8-F-E011-413-C-A4-F0-42-F8095355-A5.jpg","localImage":""},{"id":"Indonesian_Terastal_Festival_005_187_Master_Ball","setName":"Terastal Festival","setNumber":"005/187","version":"Master Ball","owned":false,"language":"Indonesian","notes":"","imageUrl":"https://i.ibb.co/39Rw20GQ/Messenger-creation-9-FDE4-D96-0-B30-4895-9976-C41-AF58-A4073.jpg","localImage":""},{"id":"Indonesian_ac3b_115_172","setName":"ac3b","setNumber":"115/172","version":"","owned":false,"language":"Indonesian","notes":"","imageUrl":"","localImage":"Images/ac3b_ID_115-172.png"},{"id":"Indonesian_s3a_048_158","setName":"s3a","setNumber":"048/158","version":"","owned":false,"language":"Indonesian","notes":"","imageUrl":"","localImage":"Images/s3a_ID_048-158.png"},{"id":"Indonesian_svA2_041_103","setName":"svA2","setNumber":"041/103","version":"","owned":false,"language":"Indonesian","notes":"","imageUrl":"","localImage":"Images/svA2_ID_041-103.png"},{"id":"Traditional_Chinese_mCF_044_742_Ex_Half_Art","setName":"mCF","setNumber":"044/742","version":"Ex Half Art","owned":false,"language":"Traditional Chinese","notes":"(from starter deck 100)","imageUrl":"","localImage":"Images/TCN005.png"},{"id":"Traditional_Chinese_m2F_038_080_NonHolo","setName":"m2F","setNumber":"038/080","version":"NonHolo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_SV11WF_005_086_Ex_Half_Art","setName":"SV11WF","setNumber":"005/086","version":"Ex Half Art","owned":false,"language":"Traditional Chinese","notes":"White flare set","imageUrl":"","localImage":"Images/TCN00014356.png"},{"id":"Traditional_Chinese_SV11WF_159_086_Ex_Full_Art","setName":"SV11WF","setNumber":"159/086","version":"Ex Full Art","owned":false,"language":"Traditional Chinese","notes":"White Flare set","imageUrl":"","localImage":"Images/TCN00016515.png"},{"id":"Traditional_Chinese_sv11WF_167_086_Ex_SAR_Special_Art_Rare","setName":"sv11WF","setNumber":"167/086","version":"Ex SAR Special Art Rare","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_SV11W_167_086_Ex_SAR_Special_Art_Rare","setName":"SV11W","setNumber":"167/086","version":"Ex SAR Special Art Rare","owned":false,"language":"Traditional Chinese","notes":"White Flare Set","imageUrl":""},{"id":"Traditional_Chinese_SV8aF_005_187_Holo","setName":"SV8aF","setNumber":"005/187","version":"Holo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00013033.png"},{"id":"Traditional_Chinese_SV8aF_005_187_Pokeball_Rev_Holo","setName":"SV8aF","setNumber":"005/187","version":"Pokeball Rev Holo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00013851.png"},{"id":"Traditional_Chinese_SV5KF_008_071_Holo","setName":"SV5KF","setNumber":"008/071","version":"Holo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00011530.png"},{"id":"Traditional_Chinese_SVEMF_008_020_NonHolo","setName":"SVEMF","setNumber":"008/020","version":"NonHolo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00012322.png"},{"id":"Traditional_Chinese_s9F_049_100_V_Half_Art","setName":"s9F","setNumber":"049/100","version":"V Half Art","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00008774.png"},{"id":"Traditional_Chinese_s9F_050_100_Vstar_Half_Art","setName":"s9F","setNumber":"050/100","version":"Vstar Half Art","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00009778.png"},{"id":"Traditional_Chinese_s4F_050_100_NonHolo","setName":"s4F","setNumber":"050/100","version":"NonHolo","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00003061.png"},{"id":"Traditional_Chinese_sc1DF_007_164_NonHolo","setName":"sc1DF","setNumber":"007/164","version":"NonHolo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00002582.png"},{"id":"Traditional_Chinese_AS6a_130_196_NonHolo","setName":"AS6a","setNumber":"130/196","version":"NonHolo","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00005460.png"},{"id":"Traditional_Chinese_AS6a_131_196_NonHolo","setName":"AS6a","setNumber":"131/196","version":"NonHolo","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00005461.png"},{"id":"Traditional_Chinese_AS5b_138_186_Gx_Half_Art","setName":"AS5b","setNumber":"138/186","version":"Gx Half Art","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00003902.png"},{"id":"Traditional_Chinese_AS5b_220_186_GX_Rainbow_Rare","setName":"AS5b","setNumber":"220/186","version":"GX Rainbow Rare","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00003903.png"},{"id":"Traditional_Chinese_AS5D_115_169_Gx_Half_Art","setName":"AS5D","setNumber":"115/169","version":"Gx Half Art","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCN00003550.png"},{"id":"Traditional_Chinese_AC1b_090_158_NonHolo","setName":"AC1b","setNumber":"090/158","version":"NonHolo","owned":true,"language":"Traditional Chinese","notes":"","imageUrl":"","localImage":"Images/TCH00000341.png"},{"id":"Traditional_Chinese_Inferno_X______X__038_080_Non_Holo","setName":"Inferno X (烈獄狂火X)","setNumber":"038/080","version":"Non Holo","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_Double_Burst_201","setName":"Double Burst","setNumber":"201","version":"","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_Star_Birth_107","setName":"Star Birth","setNumber":"107","version":"","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_Star_Birth_119","setName":"Star Birth","setNumber":"119","version":"","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Traditional_Chinese_Terastal_Festival_Masterball","setName":"Terastal Festival","setNumber":"","version":"Masterball","owned":false,"language":"Traditional Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Storming_Emergence_Abundant_CSM1C_078","setName":"Storming Emergence Abundant","setNumber":"CSM1C 078","version":"","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Brilliant_Stars__CS6B__CS6B_160_Rainbow_Vstar","setName":"Brilliant Stars (CS6B)","setNumber":"CS6B 160","version":"Rainbow Vstar","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Brilliant_Stars__CS6B__CS6B_041_Half_Art_V","setName":"Brilliant Stars (CS6B)","setNumber":"CS6B 041","version":"Half Art V","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Brilliant_Stars__CS6B__CS6B_042_Half_Art_Vstar","setName":"Brilliant Stars (CS6B)","setNumber":"CS6B 042","version":"Half Art Vstar","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Brilliant_Stars__CS6B__CS6B_139_Full_Art_V","setName":"Brilliant Stars (CS6B)","setNumber":"CS6B 139","version":"Full Art V","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Sword___Shield__CS2B__CS2B_058","setName":"Sword & Shield (CS2B)","setNumber":"CS2B 058","version":"","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_V_Starter_Deck__CS1D__CS1D_014","setName":"V Starter Deck (CS1D)","setNumber":"CS1D 014","version":"","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Striking_Competition__CSM2_5__CSM2_5_034","setName":"Striking Competition (CSM2.5)","setNumber":"CSM2.5 034","version":"","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Shining_Synergy_Summon__CSM2C__CSM2C_168_Full_Art_Gx","setName":"Shining Synergy Summon (CSM2C)","setNumber":"CSM2C 168","version":"Full Art Gx","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Shining_Synergy_Summon__CSM2C__CSM2C_084","setName":"Shining Synergy Summon (CSM2C)","setNumber":"CSM2C 084","version":"","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Shining_Synergy_Summon__CSM2C__CSM2C_085_Half_Art_Gx","setName":"Shining Synergy Summon (CSM2C)","setNumber":"CSM2C 085","version":"Half Art Gx","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Bonus_Round__CSV4C__CSV4C_056_Masterball_Rev","setName":"Bonus Round (CSV4C)","setNumber":"CSV4C 056","version":"Masterball Rev","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Bonus_Round__CSV4C__CSV4C_056_Pokeball_Rev","setName":"Bonus Round (CSV4C)","setNumber":"CSV4C 056","version":"Pokeball Rev","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Bonus_Round__CSV4C__CSV4C_056_Non_Holo_Rev","setName":"Bonus Round (CSV4C)","setNumber":"CSV4C 056","version":"Non Holo Rev","owned":true,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Masterball_Rev","setName":"Sharp Blade Awakening CSV7C","setNumber":"CSV7C 023/204","version":"Masterball Rev","owned":false,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Pokeball_Rev","setName":"Sharp Blade Awakening CSV7C","setNumber":"CSV7C 023/204","version":"Pokeball Rev","owned":false,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Non_Holo_Rev","setName":"Sharp Blade Awakening CSV7C","setNumber":"CSV7C 023/204","version":"Non Holo Rev","owned":false,"language":"Simplified Chinese","notes":"","imageUrl":""},{"id":"Russian_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":false,"language":"Russian","notes":"","imageUrl":"","localImage":"Images/s-l1600 (3).png"},{"id":"Russian_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":false,"language":"Russian","notes":"","imageUrl":"","localImage":"Images/s-l1600 (4).png"},{"id":"Portuguese_White_Flare__Fogo_Branco__005_086_Double_Rare","setName":"White Flare (Fogo Branco)","setNumber":"005/086","version":"Double Rare","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/WHT_005_R_PT_SM.png"},{"id":"Portuguese_White_Flare__Fogo_Branco__157_086_Ultra_Rare","setName":"White Flare (Fogo Branco)","setNumber":"157/086","version":"Ultra Rare","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/WHT_157_R_PT_SM.png"},{"id":"Portuguese_White_Flare__Fogo_Branco__165_086_Special_Illustration_Rare","setName":"White Flare (Fogo Branco)","setNumber":"165/086","version":"Special Illustration Rare","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/WHT_165_R_PT_SM.png"},{"id":"Portuguese_Paldean_Fates_035_091_Non_Holo__Uncommon_","setName":"Paldean Fates","setNumber":"035/091","version":"Non Holo (Uncommon)","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/PAF_035_R_PT_SM.png"},{"id":"Portuguese_Paldean_Fates_035_091_Reverse_Holo","setName":"Paldean Fates","setNumber":"035/091","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/PAF_035_R_PT_SM.png"},{"id":"Portuguese_Prismatic_Evolutions_008_131_Holo__Rare_","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Holo (Rare)","owned":false,"language":"Portuguese","notes":"","imageUrl":""},{"id":"Portuguese_Prismatic_Evolutions_008_131_Reverse_Holo","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":""},{"id":"Portuguese_Prismatic_Evolutions_008_131_Pok__Ball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Poké Ball","owned":false,"language":"Portuguese","notes":"","imageUrl":""},{"id":"Portuguese_Prismatic_Evolutions_008_131_Master_Ball","setName":"Prismatic Evolutions","setNumber":"008/131","version":"Master Ball","owned":false,"language":"Portuguese","notes":"","imageUrl":""},{"id":"Portuguese_Ancient_Origins_56_98_Non_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/AOR_056_R_PT_SM.png"},{"id":"Portuguese_Ancient_Origins_56_98_Reverse_Holo","setName":"Ancient Origins","setNumber":"56/98","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/AOR_056_R_PT_SM.png"},{"id":"Portuguese_Boundaries_Crossed_15_149_Non_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BCR_015_R_PT_SM.png"},{"id":"Portuguese_Boundaries_Crossed_15_149_Reverse_Holo","setName":"Boundaries Crossed","setNumber":"15/149","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BCR_015_R_PT_SM.png"},{"id":"Portuguese_Brilliant_Stars_064_172_Half_Art_V","setName":"Brilliant Stars","setNumber":"064/172","version":"Half Art V","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BRS_064_R_PT_SM.png"},{"id":"Portuguese_Brilliant_Stars_065_172_Half_Art_VSTAR","setName":"Brilliant Stars","setNumber":"065/172","version":"Half Art VSTAR","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BRS_065_R_PT_SM.png"},{"id":"Portuguese_Brilliant_Stars_160_172_Full_Art_V","setName":"Brilliant Stars","setNumber":"160/172","version":"Full Art V","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BRS_160_R_PT_SM.png"},{"id":"Portuguese_Brilliant_Stars_175_172_Rainbow_Rare_VSTAR_Secret","setName":"Brilliant Stars","setNumber":"175/172","version":"Rainbow Rare VSTAR Secret","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/BRS_175_R_PT_SM.png"},{"id":"Portuguese_Emerging_Powers_11_98_Non_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/EPO_011_R_PT_SM.png"},{"id":"Portuguese_Emerging_Powers_11_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"11/98","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/EPO_011_R_PT_SM.png"},{"id":"Portuguese_Emerging_Powers_12_98_Non_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/EPO_012_R_PT_SM.png"},{"id":"Portuguese_Emerging_Powers_12_98_Reverse_Holo","setName":"Emerging Powers","setNumber":"12/98","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/EPO_012_R_PT_SM.png"},{"id":"Portuguese_Cosmic_Eclipse_148_236_Non_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/CEC_148_R_PT_SM.png"},{"id":"Portuguese_Cosmic_Eclipse_148_236_Reverse_Holo","setName":"Cosmic Eclipse","setNumber":"148/236","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/CEC_148_R_PT_SM.png"},{"id":"Portuguese_Guardians_Rising_91_145_Non_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/GRI_091_R_PT_SM.png"},{"id":"Portuguese_Guardians_Rising_91_145_Reverse_Holo","setName":"Guardians Rising","setNumber":"91/145","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/GRI_091_R_PT_SM.png"},{"id":"Portuguese_Fates_Collide_71_124_Non_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/FCO_071_R_PT_SM.png"},{"id":"Portuguese_Fates_Collide_71_124_Reverse_Holo","setName":"Fates Collide","setNumber":"71/124","version":"Reverse Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":"","localImage":"Images/PT/FCO_071_R_PT_SM.png"},{"id":"Portuguese_Mega_Evo_Promo_019_Non_Holo","setName":"Mega Evo Promo","setNumber":"019","version":"Non Holo","owned":false,"language":"Portuguese","notes":"","imageUrl":""},{"id":"Japanese_Black_Collection_BW1_005_53_Non_Holo_1st_Edition","setName":"Black Collection","setNumber":"BW1 005/53","version":"Non Holo 1st Edition","language":"Japanese","imageUrl":"https://i.ebayimg.com/images/g/k7EAAeSwUPJoc4~9/s-l960.webp","notes":"","owned":false}];
+
+const FLAGS={English:"🇬🇧",Japanese:"🇯🇵",Italian:"🇮🇹",Spanish:"🇪🇸",German:"🇩🇪",French:"🇫🇷",
+  Korean:"🇰🇷",Indonesian:"🇮🇩",Thai:"🇹🇭","Traditional Chinese":"🇹🇼","Simplified Chinese":"🇨🇳",
+  Portuguese:"🇧🇷",Russian:"🇷🇺",Other:"🌐"};
+
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+let owns={},extra=[],huntMode=false,curView="grid",statusF=[],langF=[],lastMark=null,undoTmr=null,gearOpen=false,formOwnedVal=false;
+let prevLangCompletions={};
+
+// ════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════
+function loadStorage(){
+  try{const o=localStorage.getItem("whim_owns");if(o)owns=JSON.parse(o);
+    const e=localStorage.getItem("whim_extra");if(e)extra=JSON.parse(e);}catch(err){}
+}
+function saveOwns(){localStorage.setItem("whim_owns",JSON.stringify(owns))}
+function saveExtra(){localStorage.setItem("whim_extra",JSON.stringify(extra))}
+// allCards() defined below in storage section
+function owned(c){return c.id in owns?owns[c.id]:c.owned}
+
+// ════════════════════════════════════
+// FLOATING FLUFF
+// ════════════════════════════════════
+function spawnFluff(){
+  const layer=document.getElementById("fluff-layer");
+  const glyphs=["🌿","☁","✿","❋","❀","🍃","⬡","·","∘"];
+  for(let i=0;i<18;i++){
+    const el=document.createElement("div");
+    el.className="fluff";
+    const size=Math.random()*18+8;
+    const g=glyphs[Math.floor(Math.random()*glyphs.length)];
+    el.textContent=g;
+    el.style.cssText=`
+      left:${Math.random()*100}%;
+      width:${size}px;height:${size}px;
+      font-size:${size}px;
+      animation-duration:${12+Math.random()*18}s;
+      animation-delay:${Math.random()*15}s;
+    `;
+    layer.appendChild(el);
+  }
+}
+
+// ════════════════════════════════════
+// CONFETTI
+// ════════════════════════════════════
+const canvas=document.getElementById("confetti-canvas");
+const ctx=canvas.getContext("2d");
+let confettiPieces=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeCanvas();window.addEventListener("resize",resizeCanvas);
+
+function launchConfetti(x,y,count=60){
+  const colors=["#FFDAB9","#00c4b4","#52d68a","#f07070","#ffd700","#ff69b4","#87ceeb"];
+  for(let i=0;i<count;i++){
+    confettiPieces.push({
+      x:x||canvas.width/2,y:y||canvas.height/3,
+      vx:(Math.random()-0.5)*12,vy:Math.random()*-14-4,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      size:Math.random()*8+3,
+      rotation:Math.random()*360,
+      rotV:(Math.random()-0.5)*10,
+      life:1,decay:Math.random()*0.015+0.008,
+      shape:Math.random()>0.5?"rect":"circle"
+    });
+  }
+  if(!confettiPieces._running) animConfetti();
+}
+function animConfetti(){
+  if(!confettiPieces.length){ctx.clearRect(0,0,canvas.width,canvas.height);confettiPieces._running=false;return}
+  confettiPieces._running=true;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  confettiPieces=confettiPieces.filter(p=>p.life>0);
+  for(const p of confettiPieces){
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.35;p.vx*=0.99;p.rotation+=p.rotV;p.life-=p.decay;
+    ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;
+    ctx.translate(p.x,p.y);ctx.rotate(p.rotation*Math.PI/180);
+    if(p.shape==="rect"){ctx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2)}
+    else{ctx.beginPath();ctx.arc(0,0,p.size/2,0,Math.PI*2);ctx.fill()}
+    ctx.restore();
+  }
+  requestAnimationFrame(animConfetti);
+}
+
+function launchMegaConfetti(){
+  for(let i=0;i<5;i++) setTimeout(()=>launchConfetti(canvas.width*Math.random(),canvas.height*0.4,50),i*200);
+}
+
+// ════════════════════════════════════
+// LANG COMPLETE POPUP
+// ════════════════════════════════════
+function checkLangCompletions(){
+  const ls=langStats();
+  for(const[lang,st] of Object.entries(ls)){
+    const wasComplete=prevLangCompletions[lang];
+    const isComplete=st.own>=st.tot&&st.tot>0;
+    if(isComplete&&!wasComplete){
+      showLangComplete(lang);
+    }
+    prevLangCompletions[lang]=isComplete;
+  }
+}
+function showLangComplete(lang){
+  const f=FLAGS[lang]||"🌐";
+  document.getElementById("popup-title").textContent=`${f} ${lang} Complete!`;
+  document.getElementById("popup-sub").textContent=`You caught every Whimsicott in ${lang}! 🎊`;
+  const el=document.getElementById("lang-popup");
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  launchMegaConfetti();
+  setTimeout(()=>el.classList.remove("show"),3600);
+}
+
+// ════════════════════════════════════
+// STATS
+// ════════════════════════════════════
+function stats(){
+  const all=allCards(),tot=all.length,own=all.filter(c=>owned(c)).length;
+  return{tot,own,mis:tot-own,pct:own/tot};
+}
+function langStats(){
+  const m={};
+  for(const c of allCards()){
+    if(!m[c.language])m[c.language]={tot:0,own:0};
+    m[c.language].tot++;
+    if(owned(c))m[c.language].own++;
+  }
+  return m;
+}
+
+// ════════════════════════════════════
+// NAV
+// ════════════════════════════════════
+function go(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
+  document.getElementById("pg-"+id).classList.add("on");
+  const btns=[...document.querySelectorAll(".nav-btn")];
+  const idx=["dash","cards","stats"].indexOf(id);
+  if(idx>=0)btns[idx].classList.add("on");
+  if(id==="dash")renderDash();
+  if(id==="cards")renderCards();
+  if(id==="stats")renderStats();
+  closeGear();
+}
+
+// ════════════════════════════════════
+// GEAR
+// ════════════════════════════════════
+function toggleGear(){gearOpen=!gearOpen;document.getElementById("gear-panel").classList.toggle("open",gearOpen)}
+function closeGear(){gearOpen=false;document.getElementById("gear-panel").classList.remove("open")}
+function showImport(){
+  document.getElementById('import-ta').style.display='block';
+  const btn = document.getElementById('import-paste-btn');
+  if(btn) btn.style.display='block';
+}
+
+// ════════════════════════════════════
+// STATS PAGE
+// ════════════════════════════════════
+function renderStats(){
+  const s=stats();
+  document.getElementById("s-owned").textContent=s.own;
+  document.getElementById("s-miss").textContent=s.mis;
+  document.getElementById("s-total").textContent=s.tot;
+  const ls=langStats();
+  document.getElementById("s-langs").textContent=Object.keys(ls).length;
+
+  // Donut
+  const pct=s.pct;
+  const circ=2*Math.PI*48;
+  const offset=circ-(circ*pct);
+  setTimeout(()=>{
+    document.getElementById("donut-arc").style.strokeDashoffset=offset;
+    document.getElementById("donut-arc").style.transition="stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)";
+  },100);
+  document.getElementById("donut-pct").textContent=(pct*100).toFixed(1)+"%";
+
+  // Top langs
+  const sorted=Object.entries(ls).sort((a,b)=>(b[1].own/b[1].tot)-(a[1].own/a[1].tot));
+  const medals=["🥇","🥈","🥉","4️⃣","5️⃣"];
+  const tl=document.getElementById("top-langs");tl.innerHTML="";
+  sorted.slice(0,5).forEach(([lang,st],i)=>{
+    const f=FLAGS[lang]||"🌐";
+    const pct=(st.own/st.tot*100).toFixed(0);
+    const row=document.createElement("div");row.className="top-lang-row";
+    row.innerHTML=`<div class="top-lang-medal">${medals[i]||"·"}</div>
+      <div class="top-lang-name">${f} ${lang}</div>
+      <div class="bar-track sm" style="flex:1"><div class="bar-fill muted" style="width:0%" data-w="${pct}%"></div></div>
+      <div class="top-lang-pct">${pct}%</div>`;
+    tl.appendChild(row);
+  });
+  setTimeout(()=>{tl.querySelectorAll(".bar-fill").forEach(b=>{b.style.width=b.dataset.w})},150);
+
+  // Milestones
+  const ownCount=s.own;
+  const milestones=[
+    {icon:"🌱",name:"First Catch",desc:"Mark your very first card as owned",check:()=>ownCount>=1},
+    {icon:"🍃",name:"Getting Started",desc:"Own 10 cards",check:()=>ownCount>=10},
+    {icon:"🌿",name:"Cotton Collector",desc:"Own 25 cards",check:()=>ownCount>=25},
+    {icon:"🌳",name:"Halfway There",desc:"Own 50 cards",check:()=>ownCount>=50},
+    {icon:"💨",name:"Whimsicott Wind",desc:"Own 75 cards",check:()=>ownCount>=75},
+    {icon:"⭐",name:"Century Club",desc:"Own 100 cards",check:()=>ownCount>=100},
+    {icon:"🌟",name:"Dedicated Trainer",desc:"Own 150 cards",check:()=>ownCount>=150},
+    {icon:"✨",name:"Almost There",desc:"Own 200 cards",check:()=>ownCount>=200},
+    {icon:"🏆",name:"Master Collector",desc:"Own every single card",check:()=>ownCount>=s.tot},
+    {icon:"🇬🇧",name:"English Master",desc:"Complete the English set",check:()=>{const l=ls["English"];return l&&l.own>=l.tot}},
+    {icon:"🇯🇵",name:"Japanese Master",desc:"Complete the Japanese set",check:()=>{const l=ls["Japanese"];return l&&l.own>=l.tot}},
+    {icon:"🌍",name:"Multilingual",desc:"Own cards in 5+ languages",check:()=>Object.values(ls).filter(l=>l.own>0).length>=5},
+    {icon:"🌐",name:"World Collector",desc:"Own cards in every language",check:()=>Object.values(ls).every(l=>l.own>0)},
+    {icon:"🔥",name:"No Days Off",desc:"Own 3+ complete languages",check:()=>Object.values(ls).filter(l=>l.own>=l.tot).length>=3},
+  ];
+  const mw=document.getElementById("milestones-wrap");mw.innerHTML="";
+  for(const m of milestones){
+    const unlocked=m.check();
+    const el=document.createElement("div");
+    el.className=`milestone ${unlocked?"unlocked":"locked"}`;
+    el.innerHTML=`<div class="milestone-icon">${m.icon}</div>
+      <div class="milestone-text">
+        <div class="milestone-name">${m.name}</div>
+        <div class="milestone-desc">${m.desc}</div>
+      </div>
+      <div class="milestone-badge">${unlocked?"Unlocked":"Locked"}</div>`;
+    mw.appendChild(el);
+  }
+}
+
+// ════════════════════════════════════
+// HUNT TOGGLE
+// ════════════════════════════════════
+function toggleHunt(){
+  huntMode=!huntMode;
+  document.getElementById("hunt-toggle").classList.toggle("on",huntMode);
+  document.getElementById("hunt-banner").classList.toggle("show",huntMode);
+  if(huntMode){
+    statusF=["missing"];
+    document.querySelectorAll("#c-status-chips .chip").forEach(c=>{
+      const isMiss=c.dataset.s==="missing";
+      c.classList.toggle("on",isMiss);c.classList.toggle("on-red",isMiss);
+    });
+  }
+  renderCards();
+}
+
+// ════════════════════════════════════
+// CHIPS
+// ════════════════════════════════════
+function toggleStatus(btn){
+  const s=btn.dataset.s,wasOn=btn.classList.contains("on")||btn.classList.contains("on-red");
+  if(wasOn){btn.classList.remove("on","on-red");statusF=statusF.filter(x=>x!==s)}
+  else{btn.classList.add(huntMode?"on-red":"on");if(!statusF.includes(s))statusF.push(s)}
+  renderCards();
+}
+function buildLangChips(){
+  const langs=[...new Set(allCards().map(c=>c.language))].sort();
+  const wrap=document.getElementById("c-lang-chips");
+  wrap.innerHTML='<span class="chip-lbl">Lang</span>';
+  for(const lang of langs){
+    const f=FLAGS[lang]||"🌐";
+    const b=document.createElement("button");
+    b.className="chip"+(langF.includes(lang)?" on":"");
+    b.textContent=`${f} ${lang}`;
+    b.onclick=()=>{b.classList.toggle("on");langF.includes(lang)?langF=langF.filter(l=>l!==lang):langF.push(lang);renderCards()};
+    wrap.appendChild(b);
+  }
+}
+function setView(v){
+  curView=v;
+  document.getElementById("vg").classList.toggle("on",v==="grid");
+  document.getElementById("vl").classList.toggle("on",v==="list");
+  renderCards();
+}
+
+// ════════════════════════════════════
+// RENDER CARDS
+// ════════════════════════════════════
+function renderCards(){
+  const q=document.getElementById("c-search").value.toLowerCase().trim();
+  let list=[...allCards()];
+  if(statusF.includes("owned")&&!statusF.includes("missing"))list=list.filter(c=>owned(c));
+  else if(statusF.includes("missing")&&!statusF.includes("owned"))list=list.filter(c=>!owned(c));
+  if(langF.length)list=list.filter(c=>langF.includes(c.language));
+  if(q)list=list.filter(c=>c.setName.toLowerCase().includes(q)||c.setNumber.toLowerCase().includes(q)||c.version.toLowerCase().includes(q)||c.language.toLowerCase().includes(q));
+  document.getElementById("hunt-count").textContent=allCards().filter(c=>!owned(c)).length;
+  document.getElementById("c-meta-txt").textContent=`${list.length} card${list.length!==1?"s":""} shown`;
+  const grid=document.getElementById("c-grid");
+  grid.innerHTML="";grid.className="grid"+(curView==="list"?" list":"");
+  if(!list.length){grid.innerHTML='<div class="empty"><div class="e-icon">🌿</div><p>No cards match your filters</p></div>';return}
+  const frag=document.createDocumentFragment();
+  for(const card of list)frag.appendChild(buildCard(card));
+  grid.appendChild(frag);
+}
+
+// ════════════════════════════════════
+// BUILD CARD (with flip)
+// ════════════════════════════════════
+function buildCard(card){
+  const isOwned=owned(card);
+  const isHuntMissing=huntMode&&!isOwned;
+  const isHuntOwned=huntMode&&isOwned;
+  const isCustom=extra.some(e=>e.id===card.id);
+  const f=FLAGS[card.language]||"🌐";
+  const ver=card.version?` · ${card.version}`:"";
+
+  const el=document.createElement("div");
+  el.className=`card ${isOwned?"owned":"missing"}${isHuntMissing?" hunt-card":""}${isHuntOwned?" can-unmark":""}`;
+  el.dataset.id=card.id;
+
+  // Uploaded > local > remote > placeholder
+  const imgSrc = getUploadedImage(card.id) || card.localImage || card.imageUrl || '';
+  const img = imgSrc
+    ? `<img src="${imgSrc}" alt="${card.setName}" loading="lazy" onerror="if(this.dataset.tried){this.parentNode.innerHTML='<div class=no-img>🌿</div>'}else{this.dataset.tried=1;this.src='${card.imageUrl||''}'}">`
+    : `<div class="no-img">🌿</div>`;
+
+  if(curView==="list"){
+    el.innerHTML=`
+      <div class="card-img">${img}</div>
+      <div class="card-body">
+        <div class="card-name">${card.setName}${isCustom?'<span class="new-badge">NEW</span>':''}</div>
+        <div class="card-sub">${card.setNumber}${ver}</div>
+        <div class="card-tag">${f} ${card.language}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
+        ${isOwned?`<button class="card-act-btn unmark-btn" title="Unmark as owned" onclick="event.stopPropagation();unmarkCard('${card.id}',this.closest('.card'))">↩ Unmark</button>`:''}
+        <button class="edit-act-btn" title="Edit card" onclick="event.stopPropagation();openEditModal(allCards().find(c=>c.id==='${card.id}'))">✏</button>
+        <button class="card-act-btn upload-btn" title="Upload image" onclick="event.stopPropagation();triggerImageUpload('${card.id}',this.closest('.card'))">📷</button>
+        <button class="card-act-btn danger" title="Hide card" onclick="event.stopPropagation();confirmDelete('${card.id}',this.closest('.card'))">🗑</button>
+        <div class="sdot ${isOwned?"o":"m"}">${isOwned?"✓":"?"}</div>
+      </div>`;
+    if(isHuntMissing)el.onclick=e=>{if(e.target.closest('button'))return;e.stopPropagation();markCard(card,el,true)};
+    if(isHuntOwned)el.onclick=e=>{if(e.target.closest('button'))return;e.stopPropagation();markCard(card,el,false)};
+  } else {
+    // Grid mode — card flip!
+    el.innerHTML=`
+      <div class="card-flip-wrap">
+        <div class="card-flip-inner" id="flip-${card.id.replace(/[^a-z0-9]/gi,'_')}">
+          <div class="card-face card-img">
+            ${img}
+            <div class="sdot ${isOwned?"o":"m"}">${isOwned?"✓":"?"}</div>
+            ${isHuntMissing?'<div class="tap-hint">Tap — got it!</div><div class="catch-overlay">✓</div>':''}
+            ${isHuntOwned?'<div class="unmark-hint">Tap — unmark</div>':''}
+            <div class="flip-hint">click to flip</div>
+          </div>
+          <div class="card-back">
+            <div class="card-back-title">${card.setName}${isCustom?'<span class="new-badge" style="display:block;margin-top:.2rem">ADDED BY YOU</span>':''}</div>
+            <div class="card-back-row">${card.setNumber}${ver}</div>
+            <div class="card-back-row">${f} ${card.language}</div>
+            ${card.notes?`<div class="card-back-row" style="font-style:italic;color:var(--text3)">${card.notes}</div>`:''}
+            <div class="card-back-status ${isOwned?"owned":"missing"}">${isOwned?"✓ Owned":"✕ Missing"}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${card.setName}${isCustom?'<span class="new-badge">NEW</span>':''}</div>
+        <div class="card-sub">${card.setNumber}${ver}</div>
+        <div class="card-tag">${f} ${card.language}</div>
+      </div>
+      ${buildActionButtons(card, isOwned, isCustom)}`;
+
+    const flipId=`flip-${card.id.replace(/[^a-z0-9]/gi,'_')}`;
+    el.onclick=e=>{
+      const inner=document.getElementById(flipId);
+      if(!inner)return;
+      if(isHuntMissing){markCard(card,el,true);return}
+      if(isHuntOwned){markCard(card,el,false);return}
+      if(e.target.closest('.card-actions')||e.target.closest('.delete-overlay'))return;
+      // flip
+      inner.classList.toggle("flipped");
+    };
+    // Wire up action buttons after element is created
+    wireCardActions(el, card);
+  }
+  return el;
+}
+
+// ════════════════════════════════════
+// MARK / UNMARK
+// ════════════════════════════════════
+function markCard(card,el,markAsOwned){
+  lastMark={id:card.id,prev:owned(card)};
+  owns[card.id]=markAsOwned;
+  saveOwns();
+
+  if(markAsOwned){
+    el.classList.add("caught");
+    el.onclick=null;
+    // Confetti at card position
+    const rect=el.getBoundingClientRect();
+    launchConfetti(rect.left+rect.width/2,rect.top+rect.height/2,50);
+    toast(`✅ Caught! ${card.setName}`);
+  } else {
+    toast(`↩ Unmarked — ${card.setName}`,false,true);
+  }
+
+  document.getElementById("undo-msg").textContent=markAsOwned
+    ?`✅ Marked owned: ${card.setName}${card.version?" ("+card.version+")":""}`
+    :`❌ Unmarked: ${card.setName}${card.version?" ("+card.version+")":""}`;
+  const ub=document.getElementById("undo-bar");ub.classList.add("show");
+
+  if(undoTmr)clearTimeout(undoTmr);
+  undoTmr=setTimeout(()=>{
+    ub.classList.remove("show");
+    if(markAsOwned){
+      el.style.transition="opacity .35s,transform .35s";
+      el.style.opacity="0";el.style.transform="scale(.85)";
+      setTimeout(()=>{el.remove();syncAfterMark()},360);
+    } else {syncAfterMark()}
+  },3800);
+
+  if(!markAsOwned){const newEl=buildCard(card);el.replaceWith(newEl)}
+  checkLangCompletions();
+  syncAfterMark();
+}
+function doUndo(){
+  if(!lastMark)return;
+  if(lastMark.prev===false||lastMark.prev===undefined)delete owns[lastMark.id];
+  else owns[lastMark.id]=lastMark.prev;
+  saveOwns();lastMark=null;
+  if(undoTmr)clearTimeout(undoTmr);
+  document.getElementById("undo-bar").classList.remove("show");
+  toast("↩ Undone!",false,true);
+  renderCards();syncAfterMark();
+}
+function syncAfterMark(){
+  document.getElementById("hunt-count").textContent=allCards().filter(c=>!owned(c)).length;
+  if(document.getElementById("pg-dash").classList.contains("on"))renderDash();
+  if(document.getElementById("pg-stats").classList.contains("on"))renderStats();
+}
+
+// ════════════════════════════════════
+// TOAST
+// ════════════════════════════════════
+function toast(msg,isWarn=false,isUndo=false){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.className="toast up"+(isWarn?" warn":"")+(isUndo?" undo":"");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("up"),2600);
+}
+
+// ════════════════════════════════════
+// ADD CARD MODAL
+// ════════════════════════════════════
+function openModal(){
+  ["f-setname","f-setnum","f-version","f-imgurl","f-notes"].forEach(id=>{document.getElementById(id).value=""});
+  document.getElementById("f-lang").value="English";
+  formOwnedVal=false;
+  document.getElementById("f-owned-toggle").classList.remove("yes");
+  document.getElementById("f-owned-lbl").textContent="Not owned yet";
+  document.getElementById("add-modal").classList.add("open");
+}
+function closeModal(e){if(e.target===document.getElementById("add-modal"))closeModalDirect()}
+function closeModalDirect(){document.getElementById("add-modal").classList.remove("open")}
+function toggleFormOwned(){
+  formOwnedVal=!formOwnedVal;
+  document.getElementById("f-owned-toggle").classList.toggle("yes",formOwnedVal);
+  document.getElementById("f-owned-lbl").textContent=formOwnedVal?"I own this card 🎉":"Not owned yet";
+}
+function submitNewCard(){
+  const setName=document.getElementById("f-setname").value.trim();
+  const lang=document.getElementById("f-lang").value;
+  if(!setName){toast("Set name is required!",true);return}
+  const setNum=document.getElementById("f-setnum").value.trim();
+  const version=document.getElementById("f-version").value.trim();
+  const imageUrl=document.getElementById("f-imgurl").value.trim();
+  const notes=document.getElementById("f-notes").value.trim();
+  const id="CUSTOM_"+lang+"_"+setName.replace(/\s+/g,"_")+"_"+Date.now();
+  const card={id,setName,setNumber:setNum,version,language:lang,imageUrl,notes,owned:formOwnedVal};
+  extra.push(card);saveExtra();
+  if(formOwnedVal){owns[id]=true;saveOwns()}
+  closeModalDirect();buildLangChips();renderCards();renderDash();
+  toast(`🌿 Added: ${setName}${version?" ("+version+")":""}!`);
+}
+
+// ════════════════════════════════════
+// DATA MANAGEMENT
+// ════════════════════════════════════
+function exportData(){
+  const data = {
+    date: new Date().toISOString(),
+    overrides: owns,
+    customCards: extra,
+    edits: getEdits(),
+    uploads: getUploads(),
+    hidden: getHidden()
+  };
+  const json = JSON.stringify(data, null, 2);
+  const sizeMB = (new Blob([json]).size / 1024 / 1024).toFixed(1);
+  const blob = new Blob([json], {type:"application/json"});
+  const a = Object.assign(document.createElement("a"), {
+    href: URL.createObjectURL(blob),
+    download: "whimsicott-backup.json"
+  });
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`📦 Exported! (${sizeMB} MB)`);
+  closeGear();
+}
+function importData(){
+  try{
+    const raw=document.getElementById("import-ta").value.trim();
+    const p=JSON.parse(raw);
+    applyBackup(p);
+  }catch(e){ toast("❌ Invalid JSON — check format", true) }
+}
+
+function importFromFile(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const p = JSON.parse(ev.target.result);
+        applyBackup(p);
+      } catch(err) {
+        toast('❌ Could not read file — is it a valid backup?', true);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function applyBackup(p){
+  owns = p.overrides || p;
+  if(p.customCards) extra = p.customCards;
+  if(p.edits)   saveEdits(p.edits);
+  if(p.uploads) saveUploads(p.uploads);
+  if(p.hidden)  saveHidden(p.hidden);
+  saveOwns(); saveExtra();
+  buildLangChips(); renderCards(); renderDash();
+  toast('✅ Backup restored successfully!'); closeGear();
+}
+function resetData(){
+  if(!confirm("Reset ownership to spreadsheet defaults? Custom added cards will be kept but ownership changes will be lost."))return;
+  owns={};saveOwns();closeGear();toast("🔄 Reset done");renderDash();renderCards();
+}
+function restoreHidden(){
+  if(!confirm("Restore all hidden cards? They will reappear in your collection."))return;
+  saveHidden({});closeGear();toast("👁 Hidden cards restored");renderDash();renderCards();
+}
+
+// ════════════════════════════════════
+// ACTION BUTTONS BUILDER
+// ════════════════════════════════════
+function buildActionButtons(card, isOwned, isCustom) {
+  const unmarkBtn = isOwned
+    ? `<button class="card-act-btn unmark-btn" data-action="unmark">↩ Unmark</button>`
+    : '';
+  // Delete on ALL cards — base cards get hidden via hiddenCards, custom cards removed from extra
+  const deleteBtn = `<button class="card-act-btn danger" data-action="delete">🗑 Delete</button>`;
+  const editBtn   = `<button class="edit-act-btn" data-action="edit">✏ Edit</button>`;
+  const uploadBtn = `<button class="card-act-btn upload-btn" data-action="upload" title="Upload image from device">📷</button>`;
+  return `<div class="card-actions">${unmarkBtn}${editBtn}${uploadBtn}${deleteBtn}</div>
+          <div class="delete-overlay">
+            <p>Hide <strong style="color:var(--text)">${card.setName}</strong> from your tracker?</p>
+            <div class="delete-confirm-btns">
+              <button class="del-yes" data-action="confirm-delete">Yes, hide it</button>
+              <button class="del-no" data-action="cancel-delete">Cancel</button>
+            </div>
+          </div>`;
+}
+
+function wireCardActions(el, card) {
+  // Unmark button
+  const unmarkBtn = el.querySelector('[data-action="unmark"]');
+  if(unmarkBtn) unmarkBtn.onclick = e => { e.stopPropagation(); unmarkCard(card.id, el); };
+
+  // Delete button — show overlay
+  const deleteBtn = el.querySelector('[data-action="delete"]');
+  const overlay = el.querySelector('.delete-overlay');
+  if(deleteBtn && overlay) {
+    deleteBtn.onclick = e => { e.stopPropagation(); overlay.classList.add('show'); };
+    const confirmBtn = overlay.querySelector('[data-action="confirm-delete"]');
+    const cancelBtn  = overlay.querySelector('[data-action="cancel-delete"]');
+    if(confirmBtn) confirmBtn.onclick = e => { e.stopPropagation(); deleteCard(card.id, el); };
+    if(cancelBtn)  cancelBtn.onclick  = e => { e.stopPropagation(); overlay.classList.remove('show'); };
+  }
+  // Edit button
+  const editBtn2 = el.querySelector('[data-action="edit"]');
+  if(editBtn2) editBtn2.onclick = e => { e.stopPropagation(); openEditModal(card); };
+
+  // Upload image button
+  const uploadBtn2 = el.querySelector('[data-action="upload"]');
+  if(uploadBtn2) uploadBtn2.onclick = e => { e.stopPropagation(); triggerImageUpload(card.id, el); };
+}
+
+// ════════════════════════════════════
+// UNMARK CARD (mark as not owned)
+// ════════════════════════════════════
+function unmarkCard(cardId, el) {
+  owns[cardId] = false;
+  saveOwns();
+  toast('↩ Unmarked as not owned', false, true);
+  // Animate out and re-render
+  el.style.transition = 'opacity .3s, transform .3s';
+  el.style.opacity = '0'; el.style.transform = 'scale(.9)';
+  setTimeout(() => { renderCards(); syncAfterMark(); }, 300);
+}
+
+// ════════════════════════════════════
+// DELETE CARD (custom cards only)
+// ════════════════════════════════════
+function deleteCard(cardId, el) {
+  const isCustom = extra.some(c => c.id === cardId);
+  if(isCustom) {
+    // Custom card — remove entirely
+    extra = extra.filter(c => c.id !== cardId);
+    saveExtra();
+  } else {
+    // Base card — hide it by storing in hiddenCards
+    const hidden = getHidden();
+    hidden[cardId] = true;
+    saveHidden(hidden);
+  }
+  delete owns[cardId];
+  saveOwns();
+  toast('🗑 Card hidden', true);
+  el.style.transition = 'opacity .3s, transform .3s';
+  el.style.opacity = '0'; el.style.transform = 'scale(.85)';
+  setTimeout(() => { buildLangChips(); renderCards(); renderDash(); syncAfterMark(); }, 300);
+}
+
+// Also expose confirmDelete for list mode inline onclick
+function confirmDelete(cardId, el) {
+  const overlay = el.querySelector('.delete-overlay');
+  if(overlay) overlay.classList.add('show');
+}
+
+// ════════════════════════════════════
+// EDIT CARD MODAL
+// ════════════════════════════════════
+let editOwnedVal = false;
+
+function openEditModal(card) {
+  if(!card) return;
+  document.getElementById('edit-card-id').value = card.id;
+  document.getElementById('e-setname').value = card.setName || '';
+  document.getElementById('e-setnum').value = card.setNumber || '';
+  document.getElementById('e-version').value = card.version || '';
+  document.getElementById('e-lang').value = card.language || 'English';
+  // Show whatever image is currently active — uploaded > local > url
+  const uploadedImg = getUploadedImage(card.id);
+  const currentImg = uploadedImg ? '[uploaded photo]' : (card.localImage || card.imageUrl || '');
+  document.getElementById('e-imgurl').value = currentImg;
+  document.getElementById('e-imgurl').placeholder = uploadedImg
+    ? 'Paste URL or path to replace uploaded photo'
+    : 'https://… or Images/filename.png';
+  document.getElementById('e-notes').value = card.notes || '';
+  editOwnedVal = owned(card);
+  const tog = document.getElementById('e-owned-toggle');
+  tog.classList.toggle('yes', editOwnedVal);
+  document.getElementById('e-owned-lbl').textContent = editOwnedVal ? 'I own this card 🎉' : 'Not owned yet';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal(e) { if(e.target === document.getElementById('edit-modal')) closeEditModalDirect(); }
+function closeEditModalDirect() { document.getElementById('edit-modal').classList.remove('open'); }
+function toggleEditOwned() {
+  editOwnedVal = !editOwnedVal;
+  document.getElementById('e-owned-toggle').classList.toggle('yes', editOwnedVal);
+  document.getElementById('e-owned-lbl').textContent = editOwnedVal ? 'I own this card 🎉' : 'Not owned yet';
+}
+function submitEditCard() {
+  const id = document.getElementById('edit-card-id').value;
+  const setName = document.getElementById('e-setname').value.trim();
+  if(!setName) { toast('Set name is required!', true); return; }
+  const imgVal = document.getElementById('e-imgurl').value.trim();
+
+  // Work out which image fields to set — new imgVal ALWAYS wins and clears others
+  const isUrl   = imgVal.startsWith('http');
+  const isLocal = imgVal && !isUrl;
+  const newImageUrl   = isUrl   ? imgVal : '';   // clear old URL if not a URL
+  const newLocalImage = isLocal ? imgVal : '';   // clear old local if not a path
+
+  // If user set any image via edit, also clear any 📷 uploaded image for this card
+  if(imgVal) {
+    const uploads = getUploads();
+    if(uploads[id]) { delete uploads[id]; saveUploads(uploads); }
+  }
+
+  const fields = {
+    setName,
+    setNumber: document.getElementById('e-setnum').value.trim(),
+    version:   document.getElementById('e-version').value.trim(),
+    language:  document.getElementById('e-lang').value,
+    notes:     document.getElementById('e-notes').value.trim(),
+    imageUrl:  newImageUrl,
+    localImage: newLocalImage,
+  };
+
+  const extraIdx = extra.findIndex(c => c.id === id);
+  if(extraIdx !== -1) {
+    extra[extraIdx] = { ...extra[extraIdx], ...fields, owned: editOwnedVal };
+    saveExtra();
+  } else {
+    const edits = getEdits();
+    edits[id] = fields;
+    saveEdits(edits);
+  }
+  owns[id] = editOwnedVal;
+  saveOwns();
+  closeEditModalDirect();
+  buildLangChips(); renderCards(); renderDash();
+  toast(`💾 Saved: ${setName}!`);
+}
+
+// ════════════════════════════════════
+// BASE CARD EDITS STORAGE
+// ════════════════════════════════════
+function getEdits() {
+  try { return JSON.parse(localStorage.getItem('whim_edits') || '{}'); } catch(e) { return {}; }
+}
+function saveEdits(e) { localStorage.setItem('whim_edits', JSON.stringify(e)); }
+function getHidden() {
+  try { return JSON.parse(localStorage.getItem('whim_hidden') || '{}'); } catch(e) { return {}; }
+}
+function saveHidden(h) { localStorage.setItem('whim_hidden', JSON.stringify(h)); }
+
+// Apply edits overlay to allCards result
+function allCards() {
+  const edits  = getEdits();
+  const hidden = getHidden();
+  return [...BASE, ...extra]
+    .filter(c => !hidden[c.id])
+    .map(c => edits[c.id] ? {...c, ...edits[c.id]} : c);
+}
+
+// edits and uploads loaded on-demand via getEdits()/getUploads()
+
+function getUploads() {
+  try { return JSON.parse(localStorage.getItem('whim_uploads') || '{}'); } catch(e) { return {}; }
+}
+function saveUploads(u) { localStorage.setItem('whim_uploads', JSON.stringify(u)); }
+function getUploadedImage(cardId) { return getUploads()[cardId] || null; }
+
+// ════════════════════════════════════
+// IMAGE UPLOAD FROM DEVICE
+// ════════════════════════════════════
+function triggerImageUpload(cardId, cardEl) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    // Show loading overlay on card
+    const prog = document.createElement('div');
+    prog.className = 'upload-progress show';
+    prog.innerHTML = '<div class="up-icon">📷</div><div class="up-txt">Saving image…</div>';
+    cardEl.style.position = 'relative';
+    cardEl.appendChild(prog);
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      const uploads = getUploads();
+      uploads[cardId] = dataUrl;
+      saveUploads(uploads);
+      // Small delay so user sees the animation
+      setTimeout(() => {
+        prog.remove();
+        toast('📷 Image saved to this card!');
+        renderCards();
+        if(document.getElementById('pg-dash').classList.contains('on')) renderDash();
+      }, 600);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+loadStorage();
+spawnFluff();
+// Snapshot initial lang completions so we don't false-trigger on load
+const initLs=langStats();
+for(const[lang,st]of Object.entries(initLs)) prevLangCompletions[lang]=st.own>=st.tot&&st.tot>0;
+renderDash();buildLangChips();renderCards();
+</script>
+
+<!-- EDIT CARD MODAL -->
+<div class="modal-backdrop" id="edit-modal" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-title">✏ Edit Card</div>
+    <div class="modal-sub">Update the details for this card</div>
+    <input type="hidden" id="edit-card-id">
+    <div class="form-row">
+      <label class="form-lbl">Set Name *</label>
+      <input type="text" class="form-input" id="e-setname" placeholder="e.g. Scarlet & Violet 151">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Card Number</label>
+        <input type="text" class="form-input" id="e-setnum" placeholder="e.g. 073/165">
+      </div>
+      <div class="form-row" style="margin:0">
+        <label class="form-lbl">Version / Variant</label>
+        <input type="text" class="form-input" id="e-version" placeholder="e.g. Reverse Holo">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Language *</label>
+      <select class="form-select" id="e-lang">
+        <option value="English">🇬🇧 English</option>
+        <option value="Japanese">🇯🇵 Japanese</option>
+        <option value="Italian">🇮🇹 Italian</option>
+        <option value="Spanish">🇪🇸 Spanish</option>
+        <option value="German">🇩🇪 German</option>
+        <option value="French">🇫🇷 French</option>
+        <option value="Korean">🇰🇷 Korean</option>
+        <option value="Indonesian">🇮🇩 Indonesian</option>
+        <option value="Thai">🇹🇭 Thai</option>
+        <option value="Traditional Chinese">🇹🇼 Traditional Chinese</option>
+        <option value="Simplified Chinese">🇨🇳 Simplified Chinese</option>
+        <option value="Portuguese">🇧🇷 Portuguese</option>
+        <option value="Russian">🇷🇺 Russian</option>
+        <option value="Other">🌐 Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Image URL <span style="color:var(--text3)">(optional)</span></label>
+      <input type="text" class="form-input" id="e-imgurl" placeholder="https://… or Images/filename.png">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Notes <span style="color:var(--text3)">(optional)</span></label>
+      <input type="text" class="form-input" id="e-notes" placeholder="e.g. Promo from Checklane Blister">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl">Owned?</label>
+      <div class="form-owned-toggle" id="e-owned-toggle" onclick="toggleEditOwned()">
+        <div class="form-owned-pill"></div>
+        <span class="form-owned-lbl" id="e-owned-lbl">Not owned yet</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitEditCard()">💾 Save Changes</button>
+      <button class="btn-cancel" onclick="closeEditModalDirect()">Cancel</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
