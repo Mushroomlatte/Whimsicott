@@ -1089,24 +1089,27 @@ function importFromFile(){
       setTimeout(() => {
         try {
           let text = ev.target.result;
-          // Strip the uploads block before parsing — it can be 5MB+ of base64
-          // We'll restore uploads separately after the main parse
-          let uploadsRaw = null;
-          const uploadsMatch = text.match(/"uploads"\s*:\s*(\{[^}]*(?:\{[^}]*\}[^}]*)?\})/s);
-          // Simpler approach: surgically remove the uploads key from JSON text
-          // Replace "uploads": { ... } with "uploads": {}
-          text = text.replace(/"uploads"\s*:\s*\{[\s\S]*?\}\s*(?=,|\})/g, '"uploads":{}');
-          
-          const p = JSON.parse(text);
-          
-          // Now restore the full uploads from original separately
-          try {
-            const fullData = JSON.parse(ev.target.result);
-            if(fullData.uploads) p.uploads = fullData.uploads;
-          } catch(e2) {
-            // Full parse failed (too big) — that's fine, we already have the important data
+          // Surgically strip the uploads block using string indexOf/slice
+          // uploads are base64 images that can be MBs — we no longer need them
+          // since photos are now baked into the deployed site
+          const uploadsKey = '"uploads"';
+          const uStart = text.indexOf(uploadsKey);
+          if(uStart !== -1) {
+            // Find the opening brace of uploads value
+            const braceStart = text.indexOf('{', uStart + uploadsKey.length);
+            if(braceStart !== -1) {
+              // Walk through to find matching closing brace
+              let depth = 0;
+              let braceEnd = braceStart;
+              for(let i = braceStart; i < text.length; i++) {
+                if(text[i] === '{') depth++;
+                else if(text[i] === '}') { depth--; if(depth === 0){ braceEnd = i; break; } }
+              }
+              // Replace the whole uploads value with empty object
+              text = text.slice(0, braceStart) + '{}' + text.slice(braceEnd + 1);
+            }
           }
-          
+          const p = JSON.parse(text);
           applyBackup(p);
         } catch(err) {
           console.error('Import error:', err);
