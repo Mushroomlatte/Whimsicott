@@ -1,5 +1,5 @@
 {
-  "date": "2026-04-06T12:13:50.759Z",
+  "date": "2026-04-07T14:50:33.364Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -43,9 +43,9 @@
     "Italian_Prismatic_Evolutions_008_131_Pokeball": false,
     "Spanish_Unbroken_Bonds_015_162_": false,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_": false,
-    "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Non_Holo_Rev": false,
+    "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Non_Holo_Rev": true,
     "Simplified_Chinese_Shining_Synergy_Summon__CSM2C__CSM2C_084": true,
-    "CUSTOM_English_Shining_Synergy_Summon_(CSM2C)_1772113062682": false,
+    "CUSTOM_English_Shining_Synergy_Summon_(CSM2C)_1772113062682": true,
     "Simplified_Chinese_Sword___Shield__CS2B__CS2B_058": true,
     "Simplified_Chinese_Brilliant_Stars__CS6B__CS6B_160_Rainbow_Vstar": true,
     "Simplified_Chinese_Storming_Emergence_Abundant_CSM1C_078": true,
@@ -95,12 +95,12 @@
     "German_Vivid_Voltage_076_185_Non_Holo": true,
     "German_Sword___Shield_006_202_Non_Holo": true,
     "German_Sword___Shield_006_202_Reverse_Holo": true,
-    "Traditional_Chinese_SV11WF_159_086_Ex_Full_Art": false,
-    "Traditional_Chinese_SV11WF_005_086_Ex_Half_Art": false,
+    "Traditional_Chinese_SV11WF_159_086_Ex_Full_Art": true,
+    "Traditional_Chinese_SV11WF_005_086_Ex_Half_Art": true,
     "Traditional_Chinese_mCF_044_742_Ex_Half_Art": false,
-    "Traditional_Chinese_SV8aF_005_187_Holo": false,
+    "Traditional_Chinese_SV8aF_005_187_Holo": true,
     "Traditional_Chinese_SV8aF_005_187_Pokeball_Rev_Holo": false,
-    "Traditional_Chinese_SV5KF_008_071_Holo": false,
+    "Traditional_Chinese_SV5KF_008_071_Holo": true,
     "Traditional_Chinese_SVEMF_008_020_NonHolo": false,
     "Traditional_Chinese_sc1DF_007_164_NonHolo": false,
     "Traditional_Chinese_AS5b_220_186_GX_Rainbow_Rare": false,
@@ -113,12 +113,11 @@
     "Traditional_Chinese_AS5b_138_186_Gx_Half_Art": true,
     "Traditional_Chinese_AC1b_090_158_NonHolo": true,
     "Traditional_Chinese_sv11WF_167_086_Ex_SAR_Special_Art_Rare": false,
-    "Traditional_Chinese_Inferno_X______X__038_080_Non_Holo": false,
-    "Traditional_Chinese_m2F_038_080_NonHolo": false,
-    "Traditional_Chinese_Double_Burst_201": false,
+    "Traditional_Chinese_m2F_038_080_NonHolo": true,
+    "Traditional_Chinese_Double_Burst_201": true,
     "Traditional_Chinese_Terastal_Festival_Masterball": false,
-    "Traditional_Chinese_Star_Birth_119": false,
-    "Traditional_Chinese_Star_Birth_107": false,
+    "Traditional_Chinese_Star_Birth_119": true,
+    "Traditional_Chinese_Star_Birth_107": true,
     "Thai_ma2T_ma2T_041_103_Non_Holo": false,
     "Thai_sv11sT_sv11sT_010_172_Half_art_ex": false,
     "Thai_sv11st_sv11st_318_172_Fullart_Ex": false,
@@ -154,7 +153,10 @@
     "Indonesian_AC3D_115_172_Non_Holo": true,
     "Indonesian_Tag_Team_Collection_AC3A_244_Full_Art_Gx": true,
     "Indonesian_Tag_Team_Collection_AC3A_287_Rainbow": true,
-    "Indonesian_Star_Birth_119": true
+    "Indonesian_Star_Birth_119": true,
+    "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Masterball_Rev": true,
+    "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Pokeball_Rev": true,
+    "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true
   },
   "customCards": [
     {
@@ -1293,6 +1295,7 @@
     "Spanish_Mega_Evo_Promo_019_Non_Holo": true,
     "German_Mega_Evo_Promo_019_Non_Holo": true,
     "French_Mega_Evo_Promo_019_Non_Holo": true,
-    "Portuguese_Mega_Evo_Promo_019_Non_Holo": true
+    "Portuguese_Mega_Evo_Promo_019_Non_Holo": true,
+    "Traditional_Chinese_Inferno_X______X__038_080_Non_Holo": true
   }
 }
