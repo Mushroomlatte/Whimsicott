@@ -1,5 +1,5 @@
 {
-  "date": "2026-04-07T14:50:33.364Z",
+  "date": "2026-04-13T13:37:04.505Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -10,10 +10,10 @@
     "English_white_flare_alt_art_ex_": true,
     "French_Prismatic_Evolutions_008_131_Pokeball": false,
     "French_Prismatic_Evolutions_008_131_Masterball": false,
-    "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": false,
+    "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "Japanese_Amazing_Vault_Tackle_s4_050_100_Non_Holo": true,
     "German_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
-    "German_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": false,
+    "German_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true,
     "German_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": false,
     "Italian_Prismatic_Evolutions_008_131_Masterball": false,
     "German_Prismatic_Evolutions_008_131_Masterball": false,
@@ -156,7 +156,8 @@
     "Indonesian_Star_Birth_119": true,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Masterball_Rev": true,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Pokeball_Rev": true,
-    "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true
+    "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true,
+    "Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true
   },
   "customCards": [
     {
