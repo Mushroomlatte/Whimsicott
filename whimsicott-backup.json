@@ -1,5 +1,5 @@
 {
-  "date": "2026-04-13T13:37:04.505Z",
+  "date": "2026-04-28T22:44:07.489Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -79,7 +79,7 @@
     "Spanish_Play__Pokemon_Prize_Pack_Series_2_005_086_Half_Art": false,
     "Spanish_White_Flare_91_145_Non_Holo": false,
     "Spanish_White_Flare_91_145_Rev": false,
-    "Spanish_Mega_Evo_Promo_71_124_Non_Holo": false,
+    "Spanish_Mega_Evo_Promo_71_124_Non_Holo": true,
     "Spanish_Play__Pokemon_Prize_Pack_Series_2_157_086_Full_Art": true,
     "Spanish_Fates_Collide_71_124_Rev_2": false,
     "Russian_Ancient_Origins_56_98_Non_Holo": true,
@@ -157,7 +157,8 @@
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Masterball_Rev": true,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Pokeball_Rev": true,
     "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true,
-    "Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true
+    "Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
+    "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true
   },
   "customCards": [
     {
