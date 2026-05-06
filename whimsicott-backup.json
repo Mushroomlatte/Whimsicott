@@ -1,5 +1,5 @@
 {
-  "date": "2026-04-28T22:44:07.489Z",
+  "date": "2026-05-06T20:59:32.664Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -17,7 +17,7 @@
     "German_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": false,
     "Italian_Prismatic_Evolutions_008_131_Masterball": false,
     "German_Prismatic_Evolutions_008_131_Masterball": false,
-    "Korean_Terastal_Festival_ex_sv8a_005_Masterball": false,
+    "Korean_Terastal_Festival_ex_sv8a_005_Masterball": true,
     "Japanese_Black_Collection_BW1_005_53_Non_Holo": true,
     "Japanese_M_Audino-EX_Mega_Battle_Deck_XYH_007_026_Non_Holo": true,
     "Japanese_BW-P_Promotional_Cards_060_BW-P_Stamped": true,
@@ -40,7 +40,7 @@
     "Indonesian_Terastal_Festival_005_187_Master_Ball": true,
     "Italian_Prismatic_Evolutions_008_131_Holo": true,
     "Italian_Prismatic_Evolutions_008_131_Reverse_Holo": true,
-    "Italian_Prismatic_Evolutions_008_131_Pokeball": false,
+    "Italian_Prismatic_Evolutions_008_131_Pokeball": true,
     "Spanish_Unbroken_Bonds_015_162_": false,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_": false,
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Non_Holo_Rev": true,
@@ -132,7 +132,6 @@
     "Thai_Starbirth_119": false,
     "Thai_First_Impact_Set_B_AS1B_097_150": false,
     "Thai_Legendary_Clash_Set_A_AS6A_131_196": false,
-    "Thai_Shiny_VMAX_Collection_Set_B_SC3B_048_158": false,
     "Italian_White_Flare_005_086_Half_Art": true,
     "Korean_Starverse_s9_107_100_Full_Art": true,
     "Indonesian_sv11s_I_334_172_Special_Illustrartion_Rare_Ex": true,
@@ -158,7 +157,8 @@
     "Simplified_Chinese_Sharp_Blade_Awakening_CSV7C_CSV7C_023_204_Pokeball_Rev": true,
     "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true,
     "Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
-    "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true
+    "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true,
+    "Thai_svDsT_svDsT_077_163_Non_Holo": false
   },
   "customCards": [
     {
@@ -751,7 +751,7 @@
       "version": "Non Holo",
       "language": "Spanish",
       "notes": "",
-      "imageUrl": "https://images.wikidexcdn.net/mwuploads/wikidex/thumb/6/67/latest/20201120082858/Whimsicott_%28Voltaje_V%C3%ADvido_TCG%29.png/250px-Whimsicott_%28Voltaje_V%C3%ADvido_TCG%29.png",
+      "imageUrl": "",
       "localImage": ""
     },
     "Spanish_Unbroken_Bonds_015_162_Holo": {
@@ -1284,6 +1284,15 @@
       "notes": "",
       "imageUrl": "https://h.lnwfile.com/_/h/_raw/zc/20/39.jpg",
       "localImage": ""
+    },
+    "Thai_svDsT_svDsT_077_163_Non_Holo": {
+      "setName": "svDsT",
+      "setNumber": "svDsT 077/163",
+      "version": "Non Holo",
+      "language": "Thai",
+      "notes": "",
+      "imageUrl": "https://asia.pokemon-card.com/th/card-img/th00006722.png",
+      "localImage": ""
     }
   },
   "uploads": {},
@@ -1298,6 +1307,11 @@
     "German_Mega_Evo_Promo_019_Non_Holo": true,
     "French_Mega_Evo_Promo_019_Non_Holo": true,
     "Portuguese_Mega_Evo_Promo_019_Non_Holo": true,
-    "Traditional_Chinese_Inferno_X______X__038_080_Non_Holo": true
+    "Traditional_Chinese_Inferno_X______X__038_080_Non_Holo": true,
+    "Thai_______________ex_sv8a_T_005_187_Pokeball": true,
+    "Thai_____________sv5K_008_071_Holo": true,
+    "Thai_______________ex_sv8a_T_005_187_Holo": true,
+    "Thai_ex______________svDs_T_077_163_Non_Holo": true,
+    "Thai_Shiny_VMAX_Collection_Set_B_SC3B_048_158": true
   }
 }
