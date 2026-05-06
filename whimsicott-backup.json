@@ -1,5 +1,5 @@
 {
-  "date": "2026-05-06T20:59:32.664Z",
+  "date": "2026-05-06T21:09:57.432Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -158,7 +158,8 @@
     "CUSTOM_Simplified Chinese_Sword_&_Shield_(CS2B)_1772113564545": true,
     "Italian_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true,
-    "Thai_svDsT_svDsT_077_163_Non_Holo": false
+    "Thai_svDsT_svDsT_077_163_Non_Holo": false,
+    "Korean_Starverse_s9_050_100_Half_Art": true
   },
   "customCards": [
     {
