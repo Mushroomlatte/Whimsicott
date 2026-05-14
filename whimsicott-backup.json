@@ -1,5 +1,5 @@
 {
-  "date": "2026-05-09T12:36:23.602Z",
+  "date": "2026-05-14T16:39:56.707Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -78,7 +78,7 @@
     "Spanish_Play__Pokemon_Prize_Pack_Series_1_PPS2_BRS_065_Stamped": false,
     "Spanish_Play__Pokemon_Prize_Pack_Series_2_005_086_Half_Art": false,
     "Spanish_White_Flare_91_145_Non_Holo": false,
-    "Spanish_White_Flare_91_145_Rev": false,
+    "Spanish_White_Flare_91_145_Rev": true,
     "Spanish_Mega_Evo_Promo_71_124_Non_Holo": true,
     "Spanish_Play__Pokemon_Prize_Pack_Series_2_157_086_Full_Art": true,
     "Spanish_Fates_Collide_71_124_Rev_2": false,
@@ -102,7 +102,7 @@
     "Traditional_Chinese_SV8aF_005_187_Pokeball_Rev_Holo": false,
     "Traditional_Chinese_SV5KF_008_071_Holo": true,
     "Traditional_Chinese_SVEMF_008_020_NonHolo": false,
-    "Traditional_Chinese_sc1DF_007_164_NonHolo": false,
+    "Traditional_Chinese_sc1DF_007_164_NonHolo": true,
     "Traditional_Chinese_AS5b_220_186_GX_Rainbow_Rare": false,
     "Traditional_Chinese_AS5D_115_169_Gx_Half_Art": true,
     "Traditional_Chinese_s9F_049_100_V_Half_Art": true,
