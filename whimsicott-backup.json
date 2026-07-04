@@ -1,5 +1,5 @@
 {
-  "date": "2026-05-14T16:39:56.707Z",
+  "date": "2026-07-04T13:12:40.956Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -103,7 +103,7 @@
     "Traditional_Chinese_SV5KF_008_071_Holo": true,
     "Traditional_Chinese_SVEMF_008_020_NonHolo": false,
     "Traditional_Chinese_sc1DF_007_164_NonHolo": true,
-    "Traditional_Chinese_AS5b_220_186_GX_Rainbow_Rare": false,
+    "Traditional_Chinese_AS5b_220_186_GX_Rainbow_Rare": true,
     "Traditional_Chinese_AS5D_115_169_Gx_Half_Art": true,
     "Traditional_Chinese_s9F_049_100_V_Half_Art": true,
     "Traditional_Chinese_s9F_050_100_Vstar_Half_Art": true,
@@ -160,7 +160,10 @@
     "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true,
     "Thai_svDsT_svDsT_077_163_Non_Holo": false,
     "Korean_Starverse_s9_050_100_Half_Art": true,
-    "Korean_Starverse_s9_119_100_Rainbow": true
+    "Korean_Starverse_s9_119_100_Rainbow": true,
+    "CUSTOM_Simplified Chinese_CSV9.5C_1783170545100": true,
+    "CUSTOM_Simplified Chinese_CSV9.5C_1783170572340": true,
+    "CUSTOM_Simplified Chinese_CSV9.5_1783170618801": true
   },
   "customCards": [
     {
@@ -204,6 +207,36 @@
       "notes": "RAINBOW GX",
       "owned": true,
       "localImage": ""
+    },
+    {
+      "id": "CUSTOM_Simplified Chinese_CSV9.5C_1783170545100",
+      "setName": "CSV9.5C",
+      "setNumber": "008",
+      "version": "Holo",
+      "language": "Simplified Chinese",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0853/4851/6149/files/krystalkollectz_csv9.5C_008.jpg?v=1780984016",
+      "notes": "",
+      "owned": true
+    },
+    {
+      "id": "CUSTOM_Simplified Chinese_CSV9.5C_1783170572340",
+      "setName": "CSV9.5C",
+      "setNumber": "008",
+      "version": "Pokeball",
+      "language": "Simplified Chinese",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0853/4851/6149/files/krystalkollectz_csv9.5C_008pb.jpg?v=1780984018",
+      "notes": "",
+      "owned": true
+    },
+    {
+      "id": "CUSTOM_Simplified Chinese_CSV9.5_1783170618801",
+      "setName": "CSV9.5",
+      "setNumber": "008",
+      "version": "Masterball",
+      "language": "Simplified Chinese",
+      "imageUrl": "https://cdn.shopify.com/s/files/1/0853/4851/6149/files/krystalkollectz_csv9.5C_008mb.jpg?v=1780984017",
+      "notes": "",
+      "owned": true
     }
   ],
   "edits": {
