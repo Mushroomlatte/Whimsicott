@@ -1,5 +1,5 @@
 {
-  "date": "2026-07-04T13:12:40.956Z",
+  "date": "2026-09-02T13:21:03.231Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -8,7 +8,7 @@
     "English_white_flare_full_art_ex_": true,
     "English_Mega_Evo_Promo_019_Non_Holo": true,
     "English_white_flare_alt_art_ex_": true,
-    "French_Prismatic_Evolutions_008_131_Pokeball": false,
+    "French_Prismatic_Evolutions_008_131_Pokeball": true,
     "French_Prismatic_Evolutions_008_131_Masterball": false,
     "French_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "Japanese_Amazing_Vault_Tackle_s4_050_100_Non_Holo": true,
@@ -163,7 +163,26 @@
     "Korean_Starverse_s9_119_100_Rainbow": true,
     "CUSTOM_Simplified Chinese_CSV9.5C_1783170545100": true,
     "CUSTOM_Simplified Chinese_CSV9.5C_1783170572340": true,
-    "CUSTOM_Simplified Chinese_CSV9.5_1783170618801": true
+    "CUSTOM_Simplified Chinese_CSV9.5_1783170618801": true,
+    "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_065_Stamped": true,
+    "French_Emerging_Powers_11_98_Reverse_Holo": true,
+    "French_Boundaries_Crossed_15_149_Non_Holo": true,
+    "French_Boundaries_Crossed_15_149_Reverse_Holo": true,
+    "French_Ancient_Origins_56_98_Reverse_Holo": true,
+    "French_Fates_Collide_71_124_Reverse_Holo": true,
+    "French_Guardians_Rising_91_145_Reverse_Holo": true,
+    "French_Cosmic_Eclipse_148_236_Reverse_Holo": true,
+    "French_Cosmic_Eclipse_148_236_Non_Holo": true,
+    "French_Unified_Minds_144_236_Reverse_Holo": true,
+    "French_Sword___Shield_006_202_Non_Holo": true,
+    "French_Sword___Shield_006_202_Reverse_Holo": true,
+    "French_Vivid_Voltage_076_185_Non_Holo": true,
+    "French_Vivid_Voltage_076_185_Reverse_Holo": true,
+    "French_Paldean_Fates_035_091_Reverse_Holo": true,
+    "French_Temporal_Forces_015_162_Reverse_Holo": true,
+    "French_Temporal_Forces_015_162_Holo": true,
+    "French_Prismatic_Evolutions_008_131_Reverse_Holo": true,
+    "French_Prismatic_Evolutions_008_131_Holo": true
   },
   "customCards": [
     {
