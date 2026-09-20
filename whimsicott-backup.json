@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-02T13:21:03.231Z",
+  "date": "2026-09-20T11:05:59.839Z",
   "overrides": {
     "English_Play__Pokemon_Prize_Pack_Series_2_PPS2_BRS_064_Stamped": true,
     "English_Play__Pokemon_Prize_Pack_Series_1_PPS1_VIV_076_Stamped": true,
@@ -131,7 +131,7 @@
     "Thai_Starbirth_107": false,
     "Thai_Starbirth_119": false,
     "Thai_First_Impact_Set_B_AS1B_097_150": false,
-    "Thai_Legendary_Clash_Set_A_AS6A_131_196": false,
+    "Thai_Legendary_Clash_Set_A_AS6A_131_196": true,
     "Italian_White_Flare_005_086_Half_Art": true,
     "Korean_Starverse_s9_107_100_Full_Art": true,
     "Indonesian_sv11s_I_334_172_Special_Illustrartion_Rare_Ex": true,
@@ -182,7 +182,11 @@
     "French_Temporal_Forces_015_162_Reverse_Holo": true,
     "French_Temporal_Forces_015_162_Holo": true,
     "French_Prismatic_Evolutions_008_131_Reverse_Holo": true,
-    "French_Prismatic_Evolutions_008_131_Holo": true
+    "French_Prismatic_Evolutions_008_131_Holo": true,
+    "Korean_Wild_Force_sv5K_008": true,
+    "Korean_Double_Blaze_sm10_066_095_Half_Art": true,
+    "Korean_Volt_Tackle_Of_The_Heavens_s4_050_100": true,
+    "Thai_Legendary_Clash_Set_A_AS6A_130_196": true
   },
   "customCards": [
     {
